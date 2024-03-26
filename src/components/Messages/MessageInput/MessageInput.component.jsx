@@ -50,6 +50,12 @@ const MessageInput = (props) => {
         </>
     }
 
+    const handleEnterKey = (e) => {
+        if (e.key === "Enter") {
+            sendMessage();
+        }
+    }
+
     const uploadImage = (file, contentType) => {
 
         const filePath = `chat/images/${uuidv4()}.jpg`;
@@ -68,6 +74,7 @@ const MessageInput = (props) => {
     return <Segment>
         <Input
             onChange={onMessageChange}
+            onKeyPress={handleEnterKey}
             fluid={true}
             name="message"
             value={messageState}
