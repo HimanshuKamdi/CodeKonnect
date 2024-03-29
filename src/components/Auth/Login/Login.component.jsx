@@ -30,7 +30,7 @@ const Login = () => {
 
     const checkForm = () => {
         if (isFormEmpty()) {
-            seterrorState((error) => error.concat({ message: "Please fill in all fields" }));
+            seterrorState((error) => error.concat(["Please fill in all fields" ]));
             return false;
         }
         return true;
@@ -42,7 +42,7 @@ const Login = () => {
     }
 
     const formaterrors = () => {
-        return errorState.map((error, index) => <p key={index}>{error.message}</p>)
+        return errorState.map((error, index) => <h3 key={index}>{error}</h3>)
     }
 
     const onSubmit = (event) => {
@@ -55,11 +55,25 @@ const Login = () => {
                     setIsLoading(false);
                     console.log(user);
                 })
-                .catch(serverError => {
+                .catch(error => {
                     setIsLoading(false);
-                    seterrorState((error) => error.concat(serverError));
+                    if (error.code === "auth/internal-error") {
+                        // User not found in the Firebase database
+                        // Display a message to prompt the user to register
+                        seterrorState(["Wrong Username OR Password.."]);
+                    } else {
+                        // Other errors
+                        seterrorState((prevErrors) => prevErrors.concat(error.message));
+                    }
+                    console.log(error);
+                    // seterrorState(["User not found. Please register."]);
+                    // seterrorState((error) => error.concat(serverError));
+                    
                 })
 
+        }
+        else{
+            formaterrors();
         }
     }
 
@@ -93,7 +107,7 @@ const Login = () => {
                 <Button disabled={isLoading} loading={isLoading}>Login</Button>
             </Form>
             {errorState.length > 0 && <Message error>
-                <h3>Errors</h3>
+                {/* <h3>Errors</h3> */}
                 {formaterrors()}
             </Message>
             }
