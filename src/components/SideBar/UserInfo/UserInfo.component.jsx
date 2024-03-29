@@ -2,6 +2,7 @@ import React from 'react';
 import { Grid, Header, Icon, Image, Dropdown } from 'semantic-ui-react';
 import { connect } from "react-redux";
 import firebase from '../../../server/firebase';
+import CustomIcon from '../../../components/SideBar/UserInfo/image/logo3.png';
 
 import "./UserInfo.css";
 
@@ -26,8 +27,8 @@ const UserInfo = (props) => {
             <Grid.Column>
                 <Grid.Row className="userinfo_grid_row">
                     <Header inverted as="h2">
-                        <Icon name="slack" />
-                        <Header.Content>Slack</Header.Content>
+                        <img src={CustomIcon} alt="Icon"  />
+                        <Header.Content>CodeKonnect</Header.Content>
                     </Header>
                     <Header className="userinfo_displayname" inverted as="h4">
                         <Dropdown
