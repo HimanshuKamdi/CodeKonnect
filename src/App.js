@@ -13,7 +13,7 @@ function App() {
         <Messages />
       </Grid.Column>
 
-      <Grid.Column width={1}>
+      <Grid.Column width={3}>
         <span>
 
         </span>

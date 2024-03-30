@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { Input, Modal, Button, Icon } from 'semantic-ui-react';
-import mime from "mime-types"
 
-export const ImageUpload = (props) => {
-
+export const FileUpload = (props) => {
     const [fileState, setFileState] = useState(null);
 
     const onFileAdded = (e) => {
         const file = e.target.files[0];
-        console.log("Selected file:", file);
+        console.log("Selected file:", file); // Add this log statement
         if (file) {
             setFileState(file);
         }

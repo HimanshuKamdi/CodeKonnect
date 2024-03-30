@@ -7,9 +7,11 @@ import "./MessageContent.css";
 
 TimeAgo.locale(en);
 
+
 const timeAgo = new TimeAgo();
 
 const MessageContent = (props) => {
+
     return <Comment>
         <Comment.Avatar src={props.message.user.avatar} />
         <Comment.Content className={props.ownMessage ? "ownMessage" : null}>
@@ -17,6 +19,9 @@ const MessageContent = (props) => {
             <Comment.Metadata>{timeAgo.format(props.message.timestamp)}</Comment.Metadata>
             {props.message.image ? <Image onLoad={props.imageLoaded} src={props.message.image} /> :
                 <Comment.Text>{props.message.content}</Comment.Text>
+            }
+            {props.message.fileName ? <a href={""} download={props.message.fileName}>{props.message.fileName}</a> :
+                <Comment.Text>{props.message.fileName}</Comment.Text>
             }
         </Comment.Content>
     </Comment>

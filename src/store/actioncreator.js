@@ -1,10 +1,19 @@
-import { SET_USER, SET_CHANNEL ,SET_FAVOURITECHANNEL,REMOVE_FAVOURITECHANNEL} from './actiontypes';
+import { SET_USER, SET_USERS, SET_CHANNEL ,SET_FAVOURITECHANNEL,REMOVE_FAVOURITECHANNEL} from './actiontypes';
 
 export const setUser = (user) => {
     return {
         type: SET_USER,
         payload: {
             currentUser: user
+        }
+    }
+}
+
+export const setUsers = (users) => {
+    return {
+        type: SET_USERS,
+        payload: {
+            allUsers: users
         }
     }
 }
