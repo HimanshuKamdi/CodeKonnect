@@ -12,9 +12,9 @@ const timeAgo = new TimeAgo();
 
 const MessageContent = (props) => {
 
-    return <Comment>
-        <Comment.Avatar src={props.message.user.avatar} />
-        <Comment.Content className={props.ownMessage ? "ownMessage" : null}>
+    return <Comment className={props.ownMessage ? "ownContent" : "otherMessage"}>
+        {!props.ownMessage ? (<Comment.Avatar src={props.message.user.avatar} />): null}
+        <Comment.Content className={props.ownMessage ? "ownMessage" : "otherMessage"}>
             <Comment.Author as="a">{props.message.user.name}</Comment.Author>
             <Comment.Metadata>{timeAgo.format(props.message.timestamp)}</Comment.Metadata>
             {props.message.image ? <Image onLoad={props.imageLoaded} src={props.message.image} /> :

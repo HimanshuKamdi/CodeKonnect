@@ -4,6 +4,7 @@ import firebase from '../../../server/firebase';
 
 import "../Auth.css"
 import { Link } from 'react-router-dom';
+import loginImg from './login_image.avif';
 
 const Register = () => {
 
@@ -120,14 +121,17 @@ const Register = () => {
         return errorState.map((error, index) => <p key={index}>{error.message}</p>)
     }
 
-    return (<Grid verticalAlign="middle" textAlign="center" className="grid-form" >
-        <Grid.Column style={{ maxWidth: '500px' }}>
+    return (<Grid verticalAlign="middle" textAlign="center" className="grid-form" style={{ backgroundColor: 'white' }}>
+        <Grid.Column width={8}>
+            <img src={loginImg} alt="Login Image" />
+        </Grid.Column>
+        <Grid.Column width={8} style={{ maxWidth: '500px' }}>
             <Header icon as="h2">
                 <Icon name="slack" />
-                Register
+                <span style={{ color: '#1a244a' }}>Register</span>
             </Header>
             <Form onSubmit={onSubmit}>
-                <Segment stacked>
+                <Segment stacked style={{ backgroundColor: '#ddedec' }}>
                     <Form.Input
                         name="userName"
                         value={userState.userName}
@@ -165,18 +169,18 @@ const Register = () => {
                         placeholder="Confirm Password"
                     />
                 </Segment>
-                <Button disabled={isLoading} loading={isLoading}>Submit</Button>
+                <Button disabled={isLoading} loading={isLoading} style={{ backgroundColor: '#3b969a' }}>Submit</Button>
             </Form>
-            {errorState.length > 0 && <Message error>
+            {errorState.length > 0 && <Message error style={{ backgroundColor: '#ddedec' }}>
                 <h3>Errors</h3>
                 {formaterrors()}
             </Message>
             }
-            {isSuccess && <Message success>
+            {isSuccess && <Message success style={{ backgroundColor: '#ddedec' }}>
                 <h3>Successfully Registered</h3>
             </Message>
             }
-            <Message>
+            <Message style={{ backgroundColor: '#ddedec' }}>
                 Already an User? <Link to="/login" >Login </Link>
             </Message>
         </Grid.Column>

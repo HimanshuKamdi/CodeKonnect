@@ -119,7 +119,7 @@ const Messages = (props) => {
 
     return <div className="messages"><MessageHeader starChange={starChange} starred={isStarred()} isPrivateChat={props.channel?.isPrivateChat} searchTermChange={searchTermChange} channelName={props.channel?.name} uniqueUsers={uniqueusersCount()} channel={props?.channel} />
         <Segment className="messagecontent">
-            <Comment.Group>
+            <Comment.Group style={{maxWidth:"100vw"}}>
                 {displayMessages()}
                 <div ref={currentEl => divRef = currentEl}></div>
             </Comment.Group>

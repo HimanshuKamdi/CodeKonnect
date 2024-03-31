@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Grid, Form, Segment, Header, Icon, Button, Message } from 'semantic-ui-react'
+import { Grid, Form, Segment, Header, Icon, Button, Message, Image } from 'semantic-ui-react'
 import { Link } from 'react-router-dom'
 
 import google from './google.png';
+import loginImg from './login_image.avif';
 
 import firebase from '../../../server/firebase';
 import { withRouter } from "react-router-dom";
@@ -113,55 +114,60 @@ const Login = () => {
           });
     };
 
-    return <Grid verticalAlign="middle" textAlign="center" className="grid-form" >
-        <Grid.Column style={{ maxWidth: '500px' }}>
-            <Header icon as="h2">
-                <Icon name="slack" />
-            Login
-        </Header>
-            <Form onSubmit={onSubmit}>
-                <Segment stacked>
-                    <Form.Input
-                        name="email"
-                        value={userState.email}
-                        icon="mail"
-                        iconPosition="left"
-                        onChange={handleInput}
-                        type="email"
-                        placeholder="User Email"
-                    />
-                    <Form.Input
-                        name="password"
-                        value={userState.password}
-                        icon="lock"
-                        iconPosition="left"
-                        onChange={handleInput}
-                        type="password"
-                        placeholder="User Password"
-                    />
-                </Segment>
-                <Segment style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-around" }}>
-                    <div onClick={handleSignInWithGoogle} style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "8px", margin: "8px", border: "1px solid black", borderRadius: "10px", cursor:"pointer" }}>
-                        <img src={google} alt="google" style={{ height: "20px", marginRight: "10px" }} />
-                        <span>Signin with Google</span>
-                    </div>
-                    <div onClick={handleSignInWithFacebook} style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "8px", margin: "8px", border: "1px solid black", borderRadius: "10px", cursor:"pointer" }}>
-                        <img src={google} alt="google" style={{ height: "20px", marginRight: "10px" }} />
-                        <span>Signin with Facebook</span>
-                    </div>
-                </Segment>
-                <Button disabled={isLoading} loading={isLoading}>Login</Button>
-            </Form>
-            {errorState.length > 0 && <Message error>
-                <h3>Errors</h3>
-                {formaterrors()}
-            </Message>
-            }
-            <Message>
-                Not an User? <Link to="/register" >Register </Link>
-            </Message>
-        </Grid.Column>
-    </Grid>
+    return (
+        <Grid verticalAlign="middle" textAlign="center" className="grid-form" style={{ backgroundColor: 'white' }}>
+            <Grid.Column width={8} style={{ maxWidth: '400px' }}>
+                <Header icon as="h2">
+                    <Icon name="slack" />
+                    <span style={{ color: '#1a244a' }}>Login</span>
+                </Header>
+                <Form onSubmit={onSubmit} >
+                    <Segment stacked style={{ backgroundColor: '#ddedec' }}>
+                        <Form.Input
+                            name="email"
+                            value={userState.email}
+                            icon="mail"
+                            iconPosition="left"
+                            onChange={handleInput}
+                            type="email"
+                            placeholder="User Email"
+                        />
+                        <Form.Input
+                            name="password"
+                            value={userState.password}
+                            icon="lock"
+                            iconPosition="left"
+                            onChange={handleInput}
+                            type="password"
+                            placeholder="User Password"
+                        />
+                    </Segment>
+                    <Segment style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-around", backgroundColor: '#ddedec' }}>
+                        <div onClick={handleSignInWithGoogle} style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "8px", margin: "8px", border: "1px solid black", borderRadius: "10px", cursor:"pointer" }}>
+                            <img src={google} alt="google" style={{ height: "20px", marginRight: "10px" }} />
+                            <span>Signin with Google</span>
+                        </div>
+                        <div onClick={handleSignInWithFacebook} style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "8px", margin: "8px", border: "1px solid black", borderRadius: "10px", cursor:"pointer" }}>
+                            <img src={google} alt="google" style={{ height: "20px", marginRight: "10px" }} />
+                            <span>Signin with Facebook</span>
+                        </div>
+                    </Segment>
+                    <Button disabled={isLoading} loading={isLoading} style={{ backgroundColor: '#3b969a' }}>Login</Button>
+                </Form>
+                {errorState.length > 0 && <Message error>
+                    <h3>Errors</h3>
+                    {formaterrors()}
+                </Message>
+                }
+                <Message style={{ backgroundColor: '#ddedec' }}>
+                    Not an User? <Link to="/register" >Register </Link>
+                </Message>
+            </Grid.Column>
+            <Grid.Column width={8}>
+                <img src={loginImg} alt="Icon Image" />
+            </Grid.Column>
+        </Grid>
+    );
 }
 
 const mapStateToProps = (state) => {
@@ -170,6 +176,6 @@ const mapStateToProps = (state) => {
     }
   }
   
-  const IndexWithRouter = withRouter(connect(mapStateToProps)(Login));
+const IndexWithRouter = withRouter(connect(mapStateToProps)(Login));
 
 export default Login;
