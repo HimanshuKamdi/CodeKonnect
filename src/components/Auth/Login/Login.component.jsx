@@ -166,7 +166,7 @@ const Login = () => {
 
 const mapStateToProps = (state) => {
     return {
-      allUsers: state.users.allUsers,
+      users: state.users.allUsers,
     }
   }
   

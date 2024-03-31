@@ -16,7 +16,7 @@
 //     const [fileDialogState, setFileDialog] = useState(false);
 
 //     const createMessageInfo = (downloadUrl) => {
-//         return {huii
+//         return {
 //             user: {
 //                 avatar: props.user.photoURL,
 //                 name: props.user.displayName,

@@ -31,7 +31,6 @@ const Index = (props) => {
       }
       usersRef.once("value")
         .then(snapshot => {
-          console.log("Snapshot", snapshot.val());
           var allUsers = [];
           snapshot.forEach(childSnapshot => {            
             const userData = childSnapshot.val();
@@ -40,7 +39,6 @@ const Index = (props) => {
             allUsers.push(userWithUid);
           });
           props.setUsers(allUsers);
-          console.log("All Users", allUsers);
         })
         .catch(error => {
             console.error("Error fetching users:", error);
@@ -48,7 +46,7 @@ const Index = (props) => {
     })
   }, []);
 
-  console.log("Current User", props.currentUser);
+  // console.log("Current User", props.currentUser);
 
   return (<>
     {/* <AppLoader loading={props.loading && props.location.pathname === "/"} /> */}
@@ -61,8 +59,8 @@ const Index = (props) => {
 
 const mapStateToProps = (state) => {
   return {
-    currentUser: state.user.currentUser,
-    allUsers: state.users.allUsers,
+    user: state.user.currentUser, 
+    users: state.users.allUsers,
     loading: state.channel.loading
   }
 }

@@ -86,18 +86,16 @@ const Channels = (props) => {
     const displayChannels = () => {
         if (channelsState.length > 0) {
             return channelsState.map((channel) => {
-                console.log("Channel", channel);
-                if (channel.members && channel.members.some(member => member.uid === props.user.uid)) {
+                if (channel.members && props.user && channel.members.some(member => member.uid === props.user.uid)) {
                 return <Menu.Item
                     key={channel.id}
                     name={channel.name}
                     onClick={() => selectChannel(channel)}
                     active={props.channel && channel.id === props.channel.id && !props.channel.isFavourite}
                 >
-                    <Notification user={props.user} channel={props.channel}
+                <Notification user={props.user} channel={props.channel}
                         notificationChannelId={channel.id}
                         displayName= {"# " + channel.name} />
-
                 </Menu.Item>
                 }
                 else if(!channel.members) {
@@ -111,9 +109,6 @@ const Channels = (props) => {
                         notificationChannelId={channel.id}
                         displayName= {"# " + channel.name} />
                 </Menu.Item>
-                }
-                else{
-                    console.log("channel", channel.members, props.user.uid);
                 }
             }
             )
@@ -132,25 +127,43 @@ const Channels = (props) => {
         lastVisited.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
     }
 
-    const onSubmit = () => {
+    const createChannel = (key) => {
+        const channel = {
+            id: key,
+            name: channelAddState.name,
+            description: channelAddState.description,
+            members: channelAddState.members,
+            created_by: props.user.uid,
+            repo_name: channelAddState.repo_name,
+        }
+        console.log("Channel", channel);
+        console.log("channelAddState during craete channel", channelAddState);
+    return channel;
+    }
+
+    const adduser = async() => {
+        var user = props.users.find(user => user.uid === props.user.uid); 
+        console.log("user", user);
+        console.log("channelAddState before adding", channelAddState);               
+        await setChannelAddState((currentState) => {
+            let updatedState = { ...currentState };
+            updatedState.members = updatedState.members.concat(user);
+            return updatedState;
+        }) 
+        console.log("User added");
+        console.log("channelAddState after adding", channelAddState);
+    }
+
+    const onSubmit = async () => {
 
         if (!checkIfFormValid()) {
             return;
         }
 
         const key = channelsRef.push().key;
-        setChannelAddState((currentState) => {
-            let updatedState = { ...currentState };
-            updatedState.members = updatedState.members.concat(props.user);
-            return updatedState;
-        }) 
-        const channel = {
-            id: key,
-            name: channelAddState.name,
-            description: channelAddState.description,
-            members: channelAddState.members,
-            created_by: props.user.uid
-        }
+        console.log("channelAddState before calling", channelAddState);
+        await adduser();
+        const channel = await createChannel(key);
         setLoadingState(true);
         channelsRef.child(key)
             .update(channel)
