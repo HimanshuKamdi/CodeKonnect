@@ -34,7 +34,7 @@ const Login = () => {
 
     const checkForm = () => {
         if (isFormEmpty()) {
-            seterrorState((error) => error.concat(["Please fill in all fields" ]));
+            seterrorState((error) => error.concat({ message: "Please fill in all fields" }));
             return false;
         }
         return true;
@@ -46,7 +46,7 @@ const Login = () => {
     }
 
     const formaterrors = () => {
-        return errorState.map((error, index) => <h3 key={index}>{error}</h3>)
+        return errorState.map((error, index) => <p key={index}>{error.message}</p>)
     }
 
     const onSubmit = (event) => {
@@ -59,7 +59,7 @@ const Login = () => {
                     setIsLoading(false);
                     console.log(user);
                 })
-                .catch(error => {
+                .catch(serverError => {
                     setIsLoading(false);
                     if (error.code === "auth/internal-error") {
                         // User not found in the Firebase database
