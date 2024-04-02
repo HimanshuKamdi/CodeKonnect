@@ -35,9 +35,9 @@ let defaultChannelState = {
 
 const channelReducer = (state = defaultChannelState, action) => {
     if (action.type === SET_CHANNEL) {
+        console.log('Handling SET_CHANNEL action with payload:', action.payload);
         let payload = action.payload;
-        state = { ...payload };
-        state.loading= false;
+        state = { ...state, currentChannel: payload.currentChannel };
         return state;
     }
     return state;

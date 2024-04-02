@@ -138,7 +138,6 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         setfavouriteChannel: (channel) => dispatch(setfavouriteChannel(channel)),
-        // setUploadedFileUrl: (url) => dispatch(setUploadedFileUrl(url)),
         removefavouriteChannel: (channel) => dispatch(removefavouriteChannel(channel)),
     }
 }

@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import firebase from "../../../server/firebase";
 import { setChannel } from "../../../store/actioncreator"
 import { Notification } from "../Notification/Notification.component";
+import MessageHeader from "../../Messages/MessageHeader/MessageHeader.component";
 
 import './Channels.css';
 import { Menu, Icon, Modal, Button, Form, Segment } from 'semantic-ui-react';

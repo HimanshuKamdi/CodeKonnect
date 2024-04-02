@@ -19,6 +19,7 @@ export const setUsers = (users) => {
 }
 
 export const setChannel = (channel) => {
+    console.log('Dispatching SET_CHANNEL action with payload:', channel);
     return {
         type: SET_CHANNEL,
         payload: {

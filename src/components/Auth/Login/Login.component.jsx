@@ -59,7 +59,7 @@ const Login = () => {
                     setIsLoading(false);
                     console.log(user);
                 })
-                .catch(serverError => {
+                .catch(error => {
                     setIsLoading(false);
                     if (error.code === "auth/internal-error") {
                         // User not found in the Firebase database
