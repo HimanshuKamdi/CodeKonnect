@@ -24,17 +24,18 @@ export const Notification = (props) => {
 
             messagesRef.on('value', snap => {
                 let messages = snap.val();
-
-                let channelsId = Object.keys(messages);
-                let messagesTimeStamp = {};
-                channelsId.forEach((channelId) => {
-                    let channelMessageKeys = Object.keys(messages[channelId]);
-                    channelMessageKeys.reduce((agg, item) => {
-                        messagesTimeStamp[channelId] = [...messagesTimeStamp[channelId] || []];
-                        messagesTimeStamp[channelId].push(messages[channelId][item].timestamp);
+                if (messages !== null) {
+                    let channelsId = Object.keys(messages);
+                    let messagesTimeStamp = {};
+                    channelsId.forEach((channelId) => {
+                        let channelMessageKeys = Object.keys(messages[channelId]);
+                        channelMessageKeys.reduce((agg, item) => {
+                            messagesTimeStamp[channelId] = [...messagesTimeStamp[channelId] || []];
+                            messagesTimeStamp[channelId].push(messages[channelId][item].timestamp);
+                        })
                     })
-                })
-                setMessagesTimeStampState(messagesTimeStamp);
+                    setMessagesTimeStampState(messagesTimeStamp);
+                }
             })
         }
     }, [props.user]);

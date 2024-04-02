@@ -9,22 +9,59 @@ import { Menu, Icon, Modal, Button, Form, Segment } from 'semantic-ui-react';
 
 const Channels = (props) => {
     const [modalOpenState, setModalOpenState] = useState(false);
-    const [channelAddState, setChannelAddState] = useState({ name: '', description: '' });
+    const [channelAddState, setChannelAddState] = useState({ name: '', description: '', repo_name: '', members: [] });
     const [isLoadingState, setLoadingState] = useState(false);
     const [channelsState, setChannelsState] = useState([]);
+    const [createNewRepo, setCreateNewRepo] = useState(false);
+    const [suggestInput, setSuggestInput] = useState('');
+    const [suggestions, setSuggestions] = useState([]);
+    const [validChannels, setValidChannels] = useState([]);
+
+    const handleCheckboxChange = () => {
+        setCreateNewRepo(!createNewRepo);
+    }
 
     const channelsRef = firebase.database().ref("channels");
     const usersRef = firebase.database().ref("users");
+   
 
     useEffect(() => {
+        if (suggestInput.length > 0) {
+            let searchResults = props.users.filter(user => {
+                return user.displayName.toLowerCase().includes(suggestInput.toLowerCase());
+            });
+            setSuggestions(searchResults);
+        }
+        else {
+            setSuggestions([]);
+        }
+    }, [suggestInput]);
+
+    useEffect(() => {        
         channelsRef.on('child_added', (snap) => {
             setChannelsState((currentState) => {
-                let updatedState = [...currentState];
-                updatedState.push(snap.val());               
+                                let updatedState = [...currentState];
+                updatedState.push(snap.val());
                 return updatedState;
             })
         });
-
+        
+        channelsState.map((channel) => {
+            if (channel.members && channel.members.some(member => member.uid === props.user.uid)) {
+                setValidChannels((currentState) => {
+                    let updatedState = [...currentState];
+                    updatedState.push(channel);
+                    return updatedState;
+                })
+            }
+            else if(!channel.members) {
+                setValidChannels((currentState) => {
+                    let updatedState = [...currentState];
+                    updatedState.push(channel);
+                    return updatedState;
+                })
+            }
+        })
         return () => channelsRef.off();
     }, [])
 
@@ -49,18 +86,32 @@ const Channels = (props) => {
     const displayChannels = () => {
         if (channelsState.length > 0) {
             return channelsState.map((channel) => {
+                if (channel.members && props.user && channel.members.some(member => member.uid === props.user.uid)) {
                 return <Menu.Item
                     key={channel.id}
                     name={channel.name}
                     onClick={() => selectChannel(channel)}
                     active={props.channel && channel.id === props.channel.id && !props.channel.isFavourite}
                 >
-                      <Notification user={props.user} channel={props.channel}
+                <Notification user={props.user} channel={props.channel}
                         notificationChannelId={channel.id}
                         displayName= {"# " + channel.name} />
-                   
                 </Menu.Item>
-            })
+                }
+                else if(!channel.members) {
+                    return <Menu.Item
+                    key={channel.id}
+                    name={channel.name}
+                    onClick={() => selectChannel(channel)}
+                    active={props.channel && channel.id === props.channel.id && !props.channel.isFavourite}
+                >
+                    <Notification user={props.user} channel={props.channel}
+                        notificationChannelId={channel.id}
+                        displayName= {"# " + channel.name} />
+                </Menu.Item>
+                }
+            }
+            )
         }
     }
 
@@ -76,28 +127,48 @@ const Channels = (props) => {
         lastVisited.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
     }
 
-    const onSubmit = () => {
+    const createChannel = (key) => {
+        const channel = {
+            id: key,
+            name: channelAddState.name,
+            description: channelAddState.description,
+            members: channelAddState.members,
+            created_by: props.user.uid,
+            repo_name: channelAddState.repo_name,
+        }
+        console.log("Channel", channel);
+        console.log("channelAddState during craete channel", channelAddState);
+    return channel;
+    }
+
+    const adduser = async() => {
+        var user = props.users.find(user => user.uid === props.user.uid); 
+        console.log("user", user);
+        console.log("channelAddState before adding", channelAddState);               
+        await setChannelAddState((currentState) => {
+            let updatedState = { ...currentState };
+            updatedState.members = updatedState.members.concat(user);
+            return updatedState;
+        }) 
+        console.log("User added");
+        console.log("channelAddState after adding", channelAddState);
+    }
+
+    const onSubmit = async () => {
 
         if (!checkIfFormValid()) {
             return;
         }
 
         const key = channelsRef.push().key;
-
-        const channel = {
-            id: key,
-            name: channelAddState.name,
-            description: channelAddState.description,
-            created_by: {
-                name: props.user.displayName,
-                avatar: props.user.photoURL
-            }
-        }
+        console.log("channelAddState before calling", channelAddState);
+        await adduser();
+        const channel = await createChannel(key);
         setLoadingState(true);
         channelsRef.child(key)
             .update(channel)
             .then(() => {
-                setChannelAddState({ name: '', description: '' });
+                setChannelAddState({ name: '', description: '', repo_name: '', members: [] });
                 setLoadingState(false);
                 closeModal();
             })
@@ -116,12 +187,34 @@ const Channels = (props) => {
         })
     }
 
+    const handleSuggestInput = (e) => {
+        let target = e.target;
+        setSuggestInput(target.value);
+        
+    };
+
+    const handleSelectUser = (user) => {
+        if(channelAddState.members.includes(user)) {
+            setChannelAddState((currentState) => {
+                const updatedMembers = currentState.members.filter(member => member.uid !== user.uid);
+                return { ...currentState, members: updatedMembers };
+            });
+        }
+        else if (!channelAddState.members.some(member => member === user)) {
+            setChannelAddState((currentState) => {
+                let updatedState = { ...currentState };
+                updatedState.members = updatedState.members.concat(user);
+                return updatedState;
+            }) 
+    }
+    }
+
     return <> <Menu.Menu style={{ marginTop: '35px' }}>
         <Menu.Item style={{fontSize : '17px'}}>
             <span>
                 <Icon name="exchange" /> Channels
             </span>
-            ({channelsState.length})
+            ({validChannels.length})
         </Menu.Item>
         {displayChannels()}
         <Menu.Item>
@@ -151,6 +244,64 @@ const Channels = (props) => {
                             type="text"
                             placeholder="Enter Channel Description"
                         />
+                        <Form.Input
+                            name="members"
+                            value={suggestInput}
+                            onChange={handleSuggestInput}
+                            type="text"
+                            placeholder="Add Members"
+                        />
+                        {suggestions.length > 0 ? (
+                            <ul>
+                                {suggestions.map(user => (
+                                    <li
+                                        key={user.uid}
+                                        onClick={() => handleSelectUser(user)}
+                                        style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            cursor: "pointer",
+                                            backgroundColor: channelAddState.members.includes(user) ? "green" : "transparent",
+                                            margin:"10px"
+                                        }}
+                                    >
+                                        <img src={user.photoURL} style={{ width: "30px", height: "30px" }} />
+                                        {user.displayName}
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : null}
+                        {
+                            channelAddState.members.length > 0 ? (<>
+                                <h3>Selected Members</h3>
+                                <ul style={{listStyle:"none"}}>
+                                    {channelAddState.members.map(member => (
+                                        <li key={member.uid} style={{display:"flex", alignItems:"center", margin:"8px"}}>
+                                            <img src={member.photoURL} style={{ width: "30px", height: "30px" }} />
+                                            {member.displayName}
+                                        </li>
+                                    ))}
+                                </ul>
+                                </>
+                            ) : null
+                        }
+
+                        <label>Create New GitHub Repository &nbsp;</label>
+                        <input
+                            type="checkbox"
+                            checked={createNewRepo}
+                            onChange={handleCheckboxChange}
+                        />
+                        <br />  <br />
+                        {createNewRepo ? <Form.Input
+                            name="repo_name"
+                            value={channelAddState.repo_name}
+                            onChange={handleSuggestInput}
+                            type="text"
+                            placeholder="Enter Repository Name"
+                        /> : null}
+
+
                     </Segment>
                 </Form>
             </Modal.Content>
@@ -169,7 +320,8 @@ const Channels = (props) => {
 const mapStateToProps = (state) => {
     return {
         user: state.user.currentUser,
-        channel: state.channel.currentChannel
+        channel: state.channel.currentChannel,
+        users: state.users.allUsers
     }
 }
 

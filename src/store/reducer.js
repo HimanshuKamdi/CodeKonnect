@@ -1,4 +1,4 @@
-import { SET_USER, SET_CHANNEL, SET_FAVOURITECHANNEL, REMOVE_FAVOURITECHANNEL } from './actiontypes';
+import { SET_USER, SET_USERS,SET_CHANNEL, SET_FAVOURITECHANNEL, REMOVE_FAVOURITECHANNEL } from './actiontypes';
 import { combineReducers } from "redux";
 
 let defaultUserState = {
@@ -7,6 +7,19 @@ let defaultUserState = {
 
 const userReducer = (state = defaultUserState, action) => {
     if (action.type === SET_USER) {
+        let payload = action.payload;
+        state = { ...payload };
+        return state;
+    }
+    return state;
+}
+
+let defaultUsersState = {
+    allUsers: null
+}
+
+const allUsersReducer = (state = defaultUsersState, action) => {
+    if (action.type === SET_USERS) {
         let payload = action.payload;
         state = { ...payload };
         return state;
@@ -50,4 +63,4 @@ const favouriteChannelReducer = (state = defaultFavouriteChannelState, action) =
     return state;
 }
 
-export const combinedReducers = combineReducers({ user: userReducer, channel: channelReducer ,favouriteChannel : favouriteChannelReducer  })
+export const combinedReducers = combineReducers({ user: userReducer, users: allUsersReducer, channel: channelReducer ,favouriteChannel : favouriteChannelReducer  })

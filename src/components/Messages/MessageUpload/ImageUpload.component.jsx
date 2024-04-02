@@ -6,7 +6,7 @@ export const ImageUpload = (props) => {
 
     const [fileState, setFileState] = useState(null);
 
-    const acceptedTypes = ["image/png", "image/jpeg"]
+    const acceptedTypes = ["image/png", "image/jpeg", "image/jpg", "image/gif", "image/svg", "image/webp"]
 
     const onFileAdded = (e) => {
         const file = e.target.files[0];
@@ -31,7 +31,7 @@ export const ImageUpload = (props) => {
                 name="file"
                 onChange={onFileAdded}
                 fluid
-                label="File Type (png , jpeg)"
+                label="File Type (png , jpeg, webp, gif, svg)"
             />
         </Modal.Content>
         <Modal.Actions>
@@ -44,3 +44,5 @@ export const ImageUpload = (props) => {
         </Modal.Actions>
     </Modal>)
 }
+
+

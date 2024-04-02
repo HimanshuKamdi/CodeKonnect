@@ -10,6 +10,7 @@ import { Segment, Comment } from 'semantic-ui-react';
 import "./Messages.css"; 
 
 const Messages = (props) => {
+    // console.log("Messages props",props);
 
     const messageRef = firebase.database().ref('messages');
 
@@ -59,8 +60,10 @@ const Messages = (props) => {
 
     const displayMessages = () => {
         let messagesToDisplay = searchTermState ? filterMessageBySearchTerm() : messagesState;
+        // console.log("Messages",messagesToDisplay);
         if (messagesToDisplay.length > 0 && props.user !== null) {
             return messagesToDisplay.map((message) => {
+                // console.log(message);
                 return <MessageContent imageLoaded={imageLoaded} ownMessage={message.user.id === props.user.uid} key={message.timestamp} message={message} />
             })
         }
@@ -71,12 +74,15 @@ const Messages = (props) => {
     }
 
     const uniqueusersCount = () => {
-        const uniqueUsers = messagesState.reduce((acc, message) => {
+        var uniqueUsers =0;
+        if (props.channel && !props.channel.members){
+        uniqueUsers = messagesState.reduce((acc, message) => {
             if (!acc.includes(message.user.name)) {
                 acc.push(message.user.name);
             }
             return acc;
         }, []);
+    }
 
         return uniqueUsers.length;
     }
@@ -111,9 +117,9 @@ const Messages = (props) => {
         return Object.keys(props.favouriteChannels).includes(props.channel?.id);
     }
 
-    return <div className="messages"><MessageHeader starChange={starChange} starred={isStarred()} isPrivateChat={props.channel?.isPrivateChat} searchTermChange={searchTermChange} channelName={props.channel?.name} uniqueUsers={uniqueusersCount()} />
+    return <div className="messages"><MessageHeader starChange={starChange} starred={isStarred()} isPrivateChat={props.channel?.isPrivateChat} searchTermChange={searchTermChange} channelName={props.channel?.name} uniqueUsers={uniqueusersCount()} channel={props?.channel} />
         <Segment className="messagecontent">
-            <Comment.Group>
+            <Comment.Group style={{maxWidth:"100vw"}}>
                 {displayMessages()}
                 <div ref={currentEl => divRef = currentEl}></div>
             </Comment.Group>
@@ -132,6 +138,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         setfavouriteChannel: (channel) => dispatch(setfavouriteChannel(channel)),
+        // setUploadedFileUrl: (url) => dispatch(setUploadedFileUrl(url)),
         removefavouriteChannel: (channel) => dispatch(removefavouriteChannel(channel)),
     }
 }
