@@ -87,6 +87,14 @@ const Messages = (props) => {
         return uniqueUsers.length;
     }
 
+    const membersNames = () => {
+        if (props.channel && props.channel.members) {
+            return props.channel.members.map(member => member.displayName);
+        }
+        return [];
+    }
+
+
     const searchTermChange = (e) => {
         const target = e.target;
         setSearchTermState(target.value);
@@ -117,7 +125,17 @@ const Messages = (props) => {
         return Object.keys(props.favouriteChannels).includes(props.channel?.id);
     }
 
-    return <div className="messages"><MessageHeader starChange={starChange} starred={isStarred()} isPrivateChat={props.channel?.isPrivateChat} searchTermChange={searchTermChange} channelName={props.channel?.name} uniqueUsers={uniqueusersCount()} channel={props?.channel} />
+    return <div className="messages">
+        <MessageHeader
+            starChange={starChange}
+            starred={isStarred()}
+            isPrivateChat={props.channel?.isPrivateChat}
+            searchTermChange={searchTermChange}
+            channelName={props.channel?.name}
+            uniqueUsers={uniqueusersCount()}
+            channel={props?.channel}
+            members={membersNames()} 
+        />
         <Segment className="messagecontent">
             <Comment.Group style={{maxWidth:"100vw"}}>
                 {displayMessages()}

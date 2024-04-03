@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import firebase from "../../../server/firebase";
 import { setChannel } from "../../../store/actioncreator"
 import { Notification } from "../Notification/Notification.component";
-import MessageHeader from "../../Messages/MessageHeader/MessageHeader.component";
 
 import './Channels.css';
 import { Menu, Icon, Modal, Button, Form, Segment } from 'semantic-ui-react';
@@ -17,6 +16,10 @@ const Channels = (props) => {
     const [suggestInput, setSuggestInput] = useState('');
     const [suggestions, setSuggestions] = useState([]);
     const [validChannels, setValidChannels] = useState([]);
+    const [members, setMembers] = useState([]);
+    const [inputValue, setInputValue] = useState('');
+
+    console.log("Redux store state:", props.channel);
 
     const handleCheckboxChange = () => {
         setCreateNewRepo(!createNewRepo);
@@ -194,6 +197,15 @@ const Channels = (props) => {
         
     };
 
+    const handleInputChange = (e) => {
+        setInputValue(e.target.value); // Update input value state
+        // Add member immediately after typing
+        if (e.target.value.trim() !== '') {
+            setMembers([...members, e.target.value.trim()]);
+            setInputValue(''); // Clear input field after adding member
+        }
+    };
+    
     const handleSelectUser = (user) => {
         if(channelAddState.members.includes(user)) {
             setChannelAddState((currentState) => {

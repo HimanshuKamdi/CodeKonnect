@@ -14,6 +14,9 @@ const MessageHeader = (props) => {
         setModalOpen(false);
     };
 
+    console.log("Description: ", props.channel?.description || '');
+    console.log("Members: ", props.channel?.members || []);
+
     return (
         <>
             <Segment clearing onClick={handleHeaderClick} style={{ cursor: 'pointer' }}>
@@ -47,7 +50,7 @@ const MessageHeader = (props) => {
             <ChannelInfoModal
                 open={modalOpen}
                 onClose={handleCloseModal}
-                channelDescription={props.channel?.currentChannel?.description || ''}
+                channelDescription={props.channel?.description || ''}
                 channelMembers={props.channel?.currentChannel?.members || []}
             />
         </>
@@ -55,6 +58,8 @@ const MessageHeader = (props) => {
 };
 
 const ChannelInfoModal = ({ open, onClose, channelDescription, channelMembers }) => {
+    console.log("Description: ", props.channel?.description || '');
+    console.log("Members: ", props.channel?.members || []);
     return (
         <Modal open={open} onClose={onClose} size="small">
             <Modal.Header>Channel Information</Modal.Header>

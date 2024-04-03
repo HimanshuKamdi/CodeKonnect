@@ -29,19 +29,27 @@ const allUsersReducer = (state = defaultUsersState, action) => {
 
 let defaultChannelState = {
     currentChannel: null,
-    loading : true
+    loading : true,
+    channelDescription: '',
+    channelMembers: []
 }
 
 
 const channelReducer = (state = defaultChannelState, action) => {
     if (action.type === SET_CHANNEL) {
         console.log('Handling SET_CHANNEL action with payload:', action.payload);
-        let payload = action.payload;
-        state = { ...state, currentChannel: payload.currentChannel };
-        return state;
+        const payload = action.payload;
+        const { currentChannel, channelDescription, channelMembers } = payload;
+        return {
+            ...state,
+            currentChannel,
+            channelDescription, // Update channelDescription
+            channelMembers, // Update channelMembers
+            loading: false // Assuming loading should be set to false after channel is set
+        };
     }
     return state;
-}
+};
 
 let defaultFavouriteChannelState = {
     favouriteChannel: {}
