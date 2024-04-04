@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Segment, Header, Input, Icon, List } from 'semantic-ui-react';
+import { Segment, Header, Input, Icon, Image } from 'semantic-ui-react';
 
 const MessageHeader = (props) => {
     const [isInfoVisible, setIsInfoVisible] = useState(false);
@@ -50,14 +50,14 @@ const MessageHeader = (props) => {
                     <Header>Description:</Header>
                     <p>{props.channel?.description || ''}</p>
                     <Header>Members:</Header>
-                    <List divided relaxed>
+                    <div>
                         {props.channel?.members?.map((member, index) => (
-                            <List.Item key={index}>
-                                <List.Icon name="user" />
-                                {member.displayName}
-                            </List.Item>
+                            <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                                <Image src={member.photoURL} avatar />
+                                <span>{member.displayName}</span>
+                            </div>
                         ))}
-                    </List>
+                    </div>
                 </Segment>
             )}
         </>
