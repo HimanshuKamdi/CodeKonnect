@@ -1,21 +1,19 @@
 import React, { useState } from 'react';
-import { Segment, Header, Input, Icon, Modal, List } from 'semantic-ui-react';
+import { Segment, Header, Input, Icon, List } from 'semantic-ui-react';
 
 const MessageHeader = (props) => {
+    const [isInfoVisible, setIsInfoVisible] = useState(false);
+
     console.log("MessageHeader props:", props);
 
-    const [modalOpen, setModalOpen] = useState(false);
-
-    const handleHeaderClick = () => {
-        setModalOpen(true);
+    const handleHeaderClick = (event) => {
+        // Check if the click target is the search input or the star icon
+        if (event.target.name === "search" || event.target.tagName === "I") {
+            return; // Do nothing if clicked on search input or star icon
+        } else {
+            setIsInfoVisible(!isInfoVisible);
+        }
     };
-
-    const handleCloseModal = () => {
-        setModalOpen(false);
-    };
-
-    console.log("Description: ", props.channel?.description || '');
-    console.log("Members: ", props.channel?.members || []);
 
     return (
         <>
@@ -47,40 +45,22 @@ const MessageHeader = (props) => {
                     />
                 </Header>
             </Segment>
-            <ChannelInfoModal
-                open={modalOpen}
-                onClose={handleCloseModal}
-                channelDescription={props.channel?.description || ''}
-                channelMembers={props.channel?.currentChannel?.members || []}
-            />
-        </>
-    );
-};
-
-const ChannelInfoModal = ({ open, onClose, channelDescription, channelMembers }) => {
-    console.log("Description: ", props.channel?.description || '');
-    console.log("Members: ", props.channel?.members || []);
-    return (
-        <Modal open={open} onClose={onClose} size="small">
-            <Modal.Header>Channel Information</Modal.Header>
-            <Modal.Content>
-                <Modal.Description>
+            {isInfoVisible && (
+                <Segment>
                     <Header>Description:</Header>
-                    <p>{channelDescription}</p>
+                    <p>{props.channel?.description || ''}</p>
                     <Header>Members:</Header>
-                    {channelMembers && (
-                        <List divided relaxed>
-                            {channelMembers.map((member, index) => (
-                                <List.Item key={index}>
-                                    <List.Icon name="user" />
-                                    {member.displayName}
-                                </List.Item>
-                            ))}
-                        </List>
-                    )}
-                </Modal.Description>
-            </Modal.Content>
-        </Modal>
+                    <List divided relaxed>
+                        {props.channel?.members?.map((member, index) => (
+                            <List.Item key={index}>
+                                <List.Icon name="user" />
+                                {member.displayName}
+                            </List.Item>
+                        ))}
+                    </List>
+                </Segment>
+            )}
+        </>
     );
 };
 

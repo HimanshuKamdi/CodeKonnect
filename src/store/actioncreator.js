@@ -24,8 +24,8 @@ export const setChannel = (channel) => {
         type: SET_CHANNEL,
         payload: {
             currentChannel: channel,
-            channelDescription: channel.description,
-            channelMembers: channel.members
+            channelDescription: channel?.description,
+            channelMembers: channel?.members
         }
     }
 }
