@@ -8,9 +8,9 @@ import FavouriteChannels from "./FavouriteChannels/FavouriteChannels.component";
 import "./SideBar.css";
 
 export const SideBar = () => {
-    return (<Menu vertical fixed="left" borderless size="large" className="side_bar">
+    return (<Menu vertical fixed="left" borderless size="large" className="side_bar" style={{width:"300px"}}>
         <UserInfo />
-        <FavouriteChannels />
+        {/* <FavouriteChannels /> */}
         <Channels />
         <PrivateChat />
     </Menu>
