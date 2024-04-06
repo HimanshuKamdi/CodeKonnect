@@ -23,7 +23,7 @@ const Index = (props) => {
   useEffect(() => {
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        props.setUser(user);
+        // props.setUser(user);
         props.history.push("/");
       } else {
         props.setUser(null);
@@ -37,6 +37,9 @@ const Index = (props) => {
             const uid = childSnapshot.key; 
             const userWithUid = { ...userData, uid };
             allUsers.push(userWithUid);
+            if(user && user.uid === uid) {
+              props.setUser(userWithUid);
+            }
           });
           props.setUsers(allUsers);
         })
@@ -77,13 +80,11 @@ const mapDispatchToProps = (dispatch) => {
 const IndexWithRouter = withRouter(connect(mapStateToProps, mapDispatchToProps)(Index));
 
 ReactDOM.render(
-  <React.StrictMode>
     <Provider store={store}>
       <Router>
         <IndexWithRouter />
       </Router>
-    </Provider>
-  </React.StrictMode>,
+    </Provider>,
   document.getElementById('root')
 );
 

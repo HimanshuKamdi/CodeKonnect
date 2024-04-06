@@ -8,7 +8,7 @@ import FavouriteChannels from "./FavouriteChannels/FavouriteChannels.component";
 import "./SideBar.css";
 
 export const SideBar = () => {
-    return (<Menu vertical fixed="left" borderless size="large" className="side_bar" style={{width:"300px"}}>
+    return (<Menu vertical fixed="left" borderless size="large" className="side_bar">
         <UserInfo />
         {/* <FavouriteChannels /> */}
         <Channels />

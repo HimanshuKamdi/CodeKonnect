@@ -1,25 +1,22 @@
 import React from 'react';
-import { SideBar } from "./components/SideBar/SideBar.component";
-import Messages from "./components/Messages/Messages.component"
-
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import './App.css';
-import { Grid } from 'semantic-ui-react';
+
+import Homepage from './components/Homepage/homepage';
+// import Profile from './components/Profile/profile';
+// import Editorpage from './components/Editor/editor';
 
 function App() {
   return (
-    <Grid columns="equal">
-      <SideBar />
-      <Grid.Column className="messagepanel">
-        <Messages />
-      </Grid.Column>
-
-      <Grid.Column width={1}>
-        <span>
-
-        </span>
-      </Grid.Column>
-    </Grid>
-
+    <Router>
+      <div className="App">
+        <Switch>
+          <Route path="/" exact component={Homepage} />
+          {/* <Route path="/profile" component={Profile} /> */}
+          {/* <Route path="/code/:filename" component={Editorpage} /> */}
+        </Switch>
+      </div>
+    </Router>
   );
 }
 

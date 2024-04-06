@@ -35,9 +35,19 @@ let defaultChannelState = {
 }
 
 
+// const channelReducer = (state = defaultChannelState, action) => {
+//     if (action.type === SET_CHANNEL) {
+//         console.log('Handling SET_CHANNEL action with payload:', action.payload);
+//         let payload = action.payload;
+//         state = { ...state, currentChannel: payload.currentChannel };
+//         return state;
+//     }
+//     return state;
+// }
+
 const channelReducer = (state = defaultChannelState, action) => {
     if (action.type === SET_CHANNEL) {
-        console.log('Handling SET_CHANNEL action with payload:', action.payload);
+        // console.log('Handling SET_CHANNEL action with payload:', action.payload);
         const payload = action.payload;
         const { currentChannel, channelDescription, channelMembers } = payload;
         return {

@@ -57,27 +57,13 @@ const Login = () => {
                 .signInWithEmailAndPassword(userState.email, userState.password)
                 .then(user => {
                     setIsLoading(false);
-                    console.log(user);
+                    // console.log(user);
                 })
-                .catch(error => {
+                .catch(serverError => {
                     setIsLoading(false);
-                    if (error.code === "auth/internal-error") {
-                        // User not found in the Firebase database
-                        // Display a message to prompt the user to register
-                        seterrorState(["Wrong Username OR Password.."]);
-                    } else {
-                        // Other errors
-                        seterrorState((prevErrors) => prevErrors.concat(error.message));
-                    }
-                    console.log(error);
-                    // seterrorState(["User not found. Please register."]);
-                    // seterrorState((error) => error.concat(serverError));
-                    
+                    seterrorState((error) => error.concat(serverError));
                 })
 
-        }
-        else{
-            formaterrors();
         }
     }
 
@@ -112,21 +98,21 @@ const Login = () => {
             });
     };
 
-    const handleSignInWithFacebook = () => {
-        setIsLoading(true);
-        const provider = new firebase.auth.FacebookAuthProvider();
-        firebase.auth().signInWithPopup(provider)
-          .then((result) => {
-            setIsLoading(false);
-            console.log("Result", result);
-            const user = result.user;
-            console.log("User", user);
-          })
-          .catch((error) => {
-            setIsLoading(false);
-            console.error(error);
-          });
-    };
+    // const handleSignInWithFacebook = () => {
+    //     setIsLoading(true);
+    //     const provider = new firebase.auth.FacebookAuthProvider();
+    //     firebase.auth().signInWithPopup(provider)
+    //       .then((result) => {
+    //         setIsLoading(false);
+    //         console.log("Result", result);
+    //         const user = result.user;
+    //         console.log("User", user);
+    //       })
+    //       .catch((error) => {
+    //         setIsLoading(false);
+    //         console.error(error);
+    //       });
+    // };
 
     return (
         <Grid verticalAlign="middle" textAlign="center" className="grid-form" style={{ backgroundColor: 'white' }}>
@@ -161,10 +147,10 @@ const Login = () => {
                             <img src={google} alt="google" style={{ height: "20px", marginRight: "10px" }} />
                             <span>Signin with Google</span>
                         </div>
-                        <div onClick={handleSignInWithFacebook} style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "8px", margin: "8px", border: "1px solid black", borderRadius: "10px", cursor:"pointer" }}>
+                        {/* <div onClick={handleSignInWithFacebook} style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "8px", margin: "8px", border: "1px solid black", borderRadius: "10px", cursor:"pointer" }}>
                             <img src={google} alt="google" style={{ height: "20px", marginRight: "10px" }} />
                             <span>Signin with Facebook</span>
-                        </div>
+                        </div> */}
                     </Segment>
                     <Button disabled={isLoading} loading={isLoading} style={{ backgroundColor: '#3b969a' }}>Login</Button>
                 </Form>
@@ -182,7 +168,6 @@ const Login = () => {
             </Grid.Column>
         </Grid>
     );
-
 }
 
 const mapStateToProps = (state) => {
