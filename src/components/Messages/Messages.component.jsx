@@ -4,8 +4,8 @@ import MessageHeader from './MessageHeader/MessageHeader.component';
 import MessageContent from "./MessageContent/MessageContent.component";
 import MessageInput from "./MessageInput/MessageInput.component";
 import { connect } from "react-redux";
-import { setfavouriteChannel, removefavouriteChannel, updateChannelMembers } from "../../store/actioncreator";
-import firebase from "../../server/firebase";
+import { setfavouriteChannel, removefavouriteChannel } from "../../store/actioncreator";
+import firebase from "../../firebase";
 import { Segment, Comment } from 'semantic-ui-react';
 import "./Messages.css"; 
 
@@ -111,7 +111,6 @@ const Messages = (props) => {
             searchTermChange={searchTermChange}
             channelName={props.channel?.name}
             channel={props?.channel}
-            updateChannelMembers={props.updateChannelMembers}
         />
         <Segment className="messagecontent">
             <Comment.Group style={{maxWidth:"100vw"}}>
@@ -134,7 +133,6 @@ const mapDispatchToProps = (dispatch) => {
     return {
         setfavouriteChannel: (channel) => dispatch(setfavouriteChannel(channel)),
         removefavouriteChannel: (channel) => dispatch(removefavouriteChannel(channel)),
-        updateChannelMembers: (channelId, updatedMembers) => dispatch(updateChannelMembers(channelId, updatedMembers))
     }
 }
 

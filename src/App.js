@@ -4,7 +4,7 @@ import './App.css';
 
 import Homepage from './components/Homepage/homepage';
 // import Profile from './components/Profile/profile';
-// import Editorpage from './components/Editor/editor';
+import Editorpage from './components/Editor/editorpage';
 
 function App() {
   return (
@@ -13,7 +13,8 @@ function App() {
         <Switch>
           <Route path="/" exact component={Homepage} />
           {/* <Route path="/profile" component={Profile} /> */}
-          {/* <Route path="/code/:filename" component={Editorpage} /> */}
+          {/* <Route path="/files" component={Files} /> */}
+          <Route path="/code/:file" component={Editorpage} />
         </Switch>
       </div>
     </Router>

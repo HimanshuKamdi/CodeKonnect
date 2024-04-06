@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Segment, Input, Button } from "semantic-ui-react";
-import firebase from "../../../server/firebase";
+import firebase from "../../../firebase";
 import { connect } from "react-redux";
 import { ImageUpload } from "../MessageUpload/ImageUpload.component";
 import { FileUpload } from "../MessageUpload/FileUpload.component";
@@ -89,7 +89,7 @@ const MessageInput = (props) => {
                 data.ref.getDownloadURL()
                     .then((url) => {
                         sendFile(url, file.name);
-                        console.log("URL",url);
+                        // console.log("URL",url);
                     })
                     .catch((err) => console.log(err));
             })

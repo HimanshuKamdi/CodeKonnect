@@ -4,7 +4,7 @@ import Messages from "../Messages/Messages.component"
 import { Menu, Icon, Modal, Button, Form, Segment } from 'semantic-ui-react';
 import { BrowserRouter as Router, Switch, Route, withRouter } from "react-router-dom";
 import { Provider, connect } from "react-redux";
-import firebase from "../../server/firebase";
+import firebase from "../../firebase";
 import { Grid } from 'semantic-ui-react';
 
 const usersRef = firebase.database().ref("users");

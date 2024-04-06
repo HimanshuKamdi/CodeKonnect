@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 import google from './google.png';
 import loginImg from './login_image.avif';
 
-import firebase from '../../../server/firebase';
+import firebase from '../../../firebase';
 import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import "../Auth.css"

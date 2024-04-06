@@ -7,7 +7,7 @@ import { Provider, connect } from "react-redux";
 import { createStore } from "redux";
 import Register from "./components/Auth/Register/Register.component";
 import Login from "./components/Auth/Login/Login.component";
-import firebase from "./server/firebase";
+import firebase from "./firebase";
 import { combinedReducers } from "./store/reducer";
 import { setUser, setUsers } from "./store/actioncreator";
 import { AppLoader } from "./components/AppLoader/AppLoader.component";
@@ -52,7 +52,7 @@ const Index = (props) => {
   // console.log("Current User", props.currentUser);
 
   return (<>
-    {/* <AppLoader loading={props.loading && props.location.pathname === "/"} /> */}
+    <AppLoader loading={props.loading && props.location.pathname === "/"} />
     <Switch>
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />

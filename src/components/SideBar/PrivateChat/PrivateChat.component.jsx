@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import firebase from "../../../server/firebase";
+import firebase from "../../../firebase";
 import { setChannel } from "../../../store/actioncreator"
 import { Notification } from "../Notification/Notification.component";
 
@@ -22,28 +22,29 @@ const PrivateChat = (props) => {
     useEffect(() => {
         usersRef.on('child_added', (snap) => {
             setUsersState((currentState) => {
-                let updatedState = [...currentState];
-
-                let user = snap.val();
-                user.name = user.displayName;
-                user.id = snap.key;
-                user.isPrivateChat = true;
-                updatedState.push(user);
-                console.log("User", user);
-
-                return updatedState;
-            })
-        });
-
-        usersRef.on("child_removed", snap => {
-                    setConnectedUsersState((currentState) => {
-                        let updatedState = [...currentState];
+                const userId = snap.key;
+                const isUserPresent = currentState.some(user => user.id === userId);
+                if (!isUserPresent) {
+                    return [
+                        ...currentState,
+                        {
+                            ...snap.val(),
+                            name: snap.val().displayName,
+                            id: userId,
+                            isPrivateChat: true
+                        }
+                    ];
+                }
+                return currentState;
+            });
+        });  
         
-                        let index = updatedState.indexOf(snap.key);
-                        updatedState.splice(index, 1);
-                        return updatedState;
-                    })
-                });
+        usersRef.on('child_removed', (snap) => {
+            setUsersState((currentState) => {
+                const userId = snap.key;
+                return currentState.filter(user => user.id !== userId);
+            });
+        });
 
         connectedRef.on("value", snap => {
             if (props.user && snap.val()) {
@@ -54,7 +55,30 @@ const PrivateChat = (props) => {
         })
 
         return () => { usersRef.off(); connectedRef.off(); }
-    }, [])
+    }, [props.user])
+
+    useEffect(() => {
+
+        statusRef.on("child_added", snap => {
+            setConnectedUsersState((currentState) => {
+                let updatedState = [...currentState];
+                updatedState.push(snap.key);
+                return updatedState;
+            })
+        });
+
+        statusRef.on("child_removed", snap => {
+            setConnectedUsersState((currentState) => {
+                let updatedState = [...currentState];
+
+                let index = updatedState.indexOf(snap.key);
+                updatedState.splice(index, 1);
+                return updatedState;
+            })
+        });
+
+        return () => statusRef.off();
+    }, [usersState]);
 
     const displayUsers = () => {
         if (usersState.length > 0 && props.user !== null) {
@@ -77,9 +101,9 @@ const PrivateChat = (props) => {
     }
 
     const selectUser = (user) => {
-        // console.log(user);
+        console.log(user);
         let userTemp = { ...user };
-        // console.log("Temp",userTemp);
+        console.log("Temp",userTemp);
         userTemp.id = generateChannelId(user.id);
         if (props.channel !==null){
             setLastVisited(props.user, props.channel);

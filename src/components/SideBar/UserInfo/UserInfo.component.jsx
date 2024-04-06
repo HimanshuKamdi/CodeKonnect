@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, Header, Icon, Image, Dropdown } from 'semantic-ui-react';
 import { connect } from "react-redux";
-import firebase from '../../../server/firebase';
+import firebase from '../../../firebase';
 import CustomIcon from '../../../components/SideBar/UserInfo/image/logo3.png';
 import { setUser, setUsers, setChannel } from "../../../store/actioncreator";
 
