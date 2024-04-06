@@ -62,6 +62,8 @@ function Homepage(props) {
 
   return (
     <>
+    {props.user && (
+      <>
       <Grid columns="equal">
         <SideBar />
         <Grid.Column className="messagepanel" style={{paddingLeft: "300px", marginRight: "20px"}}>
@@ -106,7 +108,9 @@ function Homepage(props) {
           </Button>
         </Modal.Actions>
       </Modal>
-    </>
+   </>
+   ) }
+   </>
 
   );
 }

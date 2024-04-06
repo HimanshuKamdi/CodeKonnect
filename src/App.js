@@ -1,24 +1,75 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+// App.js
+
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Route, Switch, withRouter } from 'react-router-dom';
 import './App.css';
-
 import Homepage from './components/Homepage/homepage';
-// import Profile from './components/Profile/profile';
 import Editorpage from './components/Editor/editorpage';
+import Login from "./components/Auth/Login/Login.component";
+import Register from "./components/Auth/Register/Register.component";
+import firebase from "./firebase";
+import { connect } from "react-redux";
+import { setUser, setUsers } from "./store/actioncreator";
+import { AppLoader } from "./components/AppLoader/AppLoader.component";
 
-function App() {
+const App = (props) => {
+  const usersRef = firebase.database().ref("users");
+
+  useEffect(() => {
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        // props.setUser(user);
+        props.history.push("/");
+      } else {
+        props.setUser(null);
+        props.history.push("/login");
+      }
+      usersRef.once("value")
+        .then(snapshot => {
+          var allUsers = [];
+          snapshot.forEach(childSnapshot => {            
+            const userData = childSnapshot.val();
+            const uid = childSnapshot.key; 
+            const userWithUid = { ...userData, uid };
+            allUsers.push(userWithUid);
+            if(user && user.uid === uid) {
+              props.setUser(userWithUid);
+            }
+          });
+          props.setUsers(allUsers);
+        })
+        .catch(error => {
+            console.error("Error fetching users:", error);
+        });
+    })
+  }, []);
+
   return (
-    <Router>
       <div className="App">
+        <AppLoader loading={props.loading && props.location.pathname === "/"} />
         <Switch>
-          <Route path="/" exact component={Homepage} />
-          {/* <Route path="/profile" component={Profile} /> */}
-          {/* <Route path="/files" component={Files} /> */}
+          <Route path="/login" component={Login} />
+          <Route path="/register" component={Register} />
           <Route path="/code/:file" component={Editorpage} />
+          <Route path="/" exact component={Homepage} />
         </Switch>
       </div>
-    </Router>
   );
 }
 
-export default App;
+const mapStateToProps = (state) => {
+  return {
+    user: state.user.currentUser,
+    users: state.users.allUsers,
+    loading: state.channel.loading
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setUser: (user) => { dispatch(setUser(user)) },
+    setUsers: (users) => { dispatch(setUsers(users)) }
+  }
+}
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App));

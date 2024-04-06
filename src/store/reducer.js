@@ -1,4 +1,4 @@
-import { SET_USER, SET_USERS,SET_CHANNEL, SET_FAVOURITECHANNEL, REMOVE_FAVOURITECHANNEL } from './actiontypes';
+import { SET_USER, SET_USERS,SET_CHANNEL, SET_FAVOURITECHANNEL, REMOVE_FAVOURITECHANNEL, UPDATE_CHANNEL_MEMBERS } from './actiontypes';
 import { combineReducers } from "redux";
 
 let defaultUserState = {
@@ -57,6 +57,17 @@ const channelReducer = (state = defaultChannelState, action) => {
             channelMembers, // Update channelMembers
             loading: false // Assuming loading should be set to false after channel is set
         };
+    }else if (action.type === UPDATE_CHANNEL_MEMBERS) {
+        const { channelId, updatedMembers } = action.payload;
+        if (state.currentChannel && state.currentChannel.id === channelId) {
+            return {
+                ...state,
+                currentChannel: {
+                    ...state.currentChannel,
+                    members: updatedMembers
+                }
+            };
+        }
     }
     return state;
 };

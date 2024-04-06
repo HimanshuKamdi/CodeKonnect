@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import firebase from "../../../firebase";
-import { setChannel } from "../../../store/actioncreator"
 import { Notification } from "../Notification/Notification.component";
-
+import { setChannel, setfavouriteChannel, removefavouriteChannel } from "../../../store/actioncreator";
 import './Channels.css';
 import { Menu, Icon, Modal, Button, Form, Segment } from 'semantic-ui-react';
 
@@ -90,26 +89,6 @@ const Channels = (props) => {
     const checkIfFormValid = () => {
         return channelAddState && channelAddState.name && channelAddState.description;
     }
-
-    // const displayChannels = () => {
-    //     if (channelsState.length > 0) {
-    //         return channelsState.map((channel) => {
-    //             if (channel.members && props.user && channel.members.some(member => member.uid === props.user.uid)) {                    
-    //             return <Menu.Item
-    //                 key={channel.id}
-    //                 name={channel.name}
-    //                 onClick={() => selectChannel(channel)}
-    //                 active={props.channel && channel.id === props.channel.id && !props.channel.isFavourite}
-    //             >
-    //             <Notification user={props.user} channel={props.channel}
-    //                     notificationChannelId={channel.id}
-    //                     displayName= {"# " + channel.name} />
-    //             </Menu.Item>
-    //             }                
-    //         }
-    //         )
-    //     }
-    // }
 
     const displayChannels = () => {
         if (channelsState.length > 0) {
@@ -407,7 +386,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        selectChannel: (channel) => dispatch(setChannel(channel))
+        selectChannel: (channel) => dispatch(setChannel(channel)),
+        setfavouriteChannel: (channel) => dispatch(setfavouriteChannel(channel)),
+        removefavouriteChannel: (channel) => dispatch(removefavouriteChannel(channel))
     }
 }
 

@@ -1,4 +1,4 @@
-import { SET_USER, SET_USERS, SET_CHANNEL ,SET_FAVOURITECHANNEL,REMOVE_FAVOURITECHANNEL} from './actiontypes';
+import { SET_USER, SET_USERS, SET_CHANNEL ,SET_FAVOURITECHANNEL,REMOVE_FAVOURITECHANNEL, UPDATE_CHANNEL_MEMBERS} from './actiontypes';
 
 export const setUser = (user) => {
     return {
@@ -34,7 +34,10 @@ export const setfavouriteChannel = (channel) => {
     return {
         type: SET_FAVOURITECHANNEL,
         payload: {
-            favouriteChannel: channel
+            favouriteChannel: {
+                channelId: channel.id, // Make sure channel.id is correctly set
+                channelName: channel.name // Make sure channel.name is correctly set
+            }
         }
     }
 }
@@ -42,8 +45,23 @@ export const setfavouriteChannel = (channel) => {
 export const removefavouriteChannel = (channel) => {
     return {
         type: REMOVE_FAVOURITECHANNEL,
+        // payload: {
+        //     favouriteChannel: channel
+        // }
         payload: {
-            favouriteChannel: channel
+            favouriteChannel: {
+                channelId: channel.id
+            }
+        }
+    }
+}
+
+export const updateChannelMembers = (channelId, updatedMembers) => {
+    return {
+        type: UPDATE_CHANNEL_MEMBERS,
+        payload: {
+            channelId: channelId,
+            updatedMembers: updatedMembers
         }
     }
 }

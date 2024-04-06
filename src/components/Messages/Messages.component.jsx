@@ -4,7 +4,7 @@ import MessageHeader from './MessageHeader/MessageHeader.component';
 import MessageContent from "./MessageContent/MessageContent.component";
 import MessageInput from "./MessageInput/MessageInput.component";
 import { connect } from "react-redux";
-import { setfavouriteChannel, removefavouriteChannel } from "../../store/actioncreator";
+import { setfavouriteChannel, removefavouriteChannel, updateChannelMembers } from "../../store/actioncreator";
 import firebase from "../../firebase";
 import { Segment, Comment } from 'semantic-ui-react';
 import "./Messages.css"; 
@@ -21,6 +21,7 @@ const Messages = (props) => {
     const [searchTermState, setSearchTermState] = useState("");
 
     let divRef = useRef();
+    
 
     useEffect(() => {
         if (props.channel) {
@@ -73,6 +74,27 @@ const Messages = (props) => {
         divRef.scrollIntoView({behavior : 'smooth'});
     }
 
+    const uniqueusersCount = () => {
+        var uniqueUsers =0;
+        if (props.channel && !props.channel.members){
+        uniqueUsers = messagesState.reduce((acc, message) => {
+            if (!acc.includes(message.user.name)) {
+                acc.push(message.user.name);
+            }
+            return acc;
+        }, []);
+    }
+
+         return uniqueUsers.length;
+    }
+
+    const membersNames = () => {
+        if (props.channel && props.channel.members) {
+            return props.channel.members.map(member => member.displayName);
+        }
+        return [];
+    }
+
     const searchTermChange = (e) => {
         const target = e.target;
         setSearchTermState(target.value);
@@ -110,7 +132,10 @@ const Messages = (props) => {
             isPrivateChat={props.channel?.isPrivateChat}
             searchTermChange={searchTermChange}
             channelName={props.channel?.name}
+            uniqueUsers={uniqueusersCount()}
             channel={props?.channel}
+            members={membersNames()} 
+            updateChannelMembers={props.updateChannelMembers}
         />
         <Segment className="messagecontent">
             <Comment.Group style={{maxWidth:"100vw"}}>
@@ -133,6 +158,7 @@ const mapDispatchToProps = (dispatch) => {
     return {
         setfavouriteChannel: (channel) => dispatch(setfavouriteChannel(channel)),
         removefavouriteChannel: (channel) => dispatch(removefavouriteChannel(channel)),
+        updateChannelMembers: (channelId, updatedMembers) => dispatch(updateChannelMembers(channelId, updatedMembers))
     }
 }
 
