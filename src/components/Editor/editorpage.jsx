@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import ACTIONS from '../../socket_io/actions';
 import Client from './client';
 import Editor from './editor';
+import { useHistory } from "react-router-dom";
 import { initSocket } from '../../socket_io/socket';
 import {
     useLocation,
@@ -10,14 +11,16 @@ import {
     Navigate,
     useParams,
 } from 'react-router-dom';
+import "./editorpage.css";
 
-function EditorPage() {
+function EditorPage(props) {
+    const history = useHistory();
     const socketRef = useRef(null);
     const codeRef = useRef(null);
     const location = useLocation();
     const { roomId } = useParams();
-    // const reactNavigator = useNavigate();
     const [clients, setClients] = useState([]);
+    const { fileContent } = props.location.state;
 
     useEffect(() => {
         const init = async () => {
@@ -36,7 +39,6 @@ function EditorPage() {
                 username: location.state?.username,
             });
 
-            // Listening for joined event
             socketRef.current.on(
                 ACTIONS.JOINED,
                 ({ clients, username, socketId }) => {
@@ -73,18 +75,8 @@ function EditorPage() {
         };
     }, []);
 
-    async function copyRoomId() {
-        try {
-            await navigator.clipboard.writeText(roomId);
-            toast.success('Room ID has been copied to your clipboard');
-        } catch (err) {
-            toast.error('Could not copy the Room ID');
-            console.error(err);
-        }
-    }
-
     function leaveRoom() {
-        // reactNavigator('/');
+        history.goBack(); 
     }
 
     if (!location.state) {
@@ -112,9 +104,6 @@ function EditorPage() {
                         ))}
                     </div>
                 </div>
-                <button className="btn copyBtn" onClick={copyRoomId}>
-                    Copy ROOM ID
-                </button>
                 <button className="btn leaveBtn" onClick={leaveRoom}>
                     Leave
                 </button>
@@ -126,7 +115,7 @@ function EditorPage() {
                     onCodeChange={(code) => {
                         codeRef.current = code;
                     }}
-                    
+                    fileContent={fileContent}                    
                 />
             </div>
         </div>

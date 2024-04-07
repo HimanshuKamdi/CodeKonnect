@@ -7,6 +7,7 @@ import Homepage from './components/Homepage/homepage';
 import Editorpage from './components/Editor/editorpage';
 import Login from "./components/Auth/Login/Login.component";
 import Register from "./components/Auth/Register/Register.component";
+import Files from "./components/Files/files";
 import firebase from "./firebase";
 import { connect } from "react-redux";
 import { setUser, setUsers } from "./store/actioncreator";
@@ -18,7 +19,7 @@ const App = (props) => {
   useEffect(() => {
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        // props.setUser(user);
+        // props.setUser(user);        
         props.history.push("/");
       } else {
         props.setUser(null);
@@ -50,7 +51,8 @@ const App = (props) => {
         <Switch>
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
-          <Route path="/code/:file" component={Editorpage} />
+          <Route path="/files/:channelname" component={Files} />
+          <Route path="/code/:filePath" component={Editorpage} />
           <Route path="/" exact component={Homepage} />
         </Switch>
       </div>

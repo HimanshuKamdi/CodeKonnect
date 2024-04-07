@@ -35,62 +35,67 @@ const MessageHeader = (props) => {
     const handleRemoveMember = (member) => {
         // Filter out the member to be removed
         const updatedMembers = props.channel?.members?.filter(m => m.uid !== member.uid);
-        
+
         // Update the channel's members
         props.updateChannelMembers(props.channel.id, updatedMembers);
         console.log("Remove member:", member);
-    
+
     };
 
     return (
         <>
-        {props.channel && <>
-            <Segment clearing onClick={handleHeaderClick} style={{ cursor: 'pointer' }}>
-                <Header floated="left" fluid as="h2">
-                    <span>
-                        {(props.isPrivateChat ? "@ " : "# ") + props.channelName}
-                        {!props.isPrivateChat && (
-                            <Icon
-                                onClick={props.starChange}
-                                name={props.starred ? "star" : "star outline"}
-                                color={props.starred ? "yellow" : "black"}
-                            />
-                        )}
-                    </span>
-                    {!props.isPrivateChat && (
-                        <Header.Subheader>
-                            {props.channel.members.length} User{props.channel.members.length === 1 ? "" : "s"}                            
-                        </Header.Subheader>
-                    )}
-                </Header>
-                <Header floated="right">
-                    <Input
-                        name="search"
-                        icon="search"
-                        placeholder="Search Messages"
-                        size="mini"
-                        onChange={props.searchTermChange}
-                    />
-                </Header>
-            </Segment>
-            {isInfoVisible && (
-                <Segment>
-                    <Header>Description:</Header>
-                    <p>{props.channel?.description || ''}</p>
-                    <Header>Members:</Header>
-                    <div>
-                        {props.channel?.members?.map((member, index) => (
-                            <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                                <Image src={member.photoURL} avatar />
-                                <span>{member.displayName}</span>
-                                {/* <Button icon="remove" size="mini" onClick={() => handleRemoveMember(member)} /> */}
-                                <RemoveButton onClick={() => handleRemoveMember(member)}>Remove</RemoveButton>
+            {props.channel && <>
+                <Segment clearing style={{ cursor: 'pointer' }}>
+                    <Header floated="left" fluid as="h2" >
+                        <div style={{display:"block-inline"}}>
+                        <span onClick={handleHeaderClick}>
+                            {(props.isPrivateChat ? "@ " : "# ") + props.channelName}
+                        </span>
+                            {!props.isPrivateChat && (
+                                <Icon
+                                    onClick={props.starChange}
+                                    name={props.starred ? "star" : "star outline"}
+                                    color={props.starred ? "yellow" : "black"}
+                                />
+                            )}
                             </div>
-                        ))}
-                    </div>
+                        {!props.isPrivateChat && (
+                            <Header.Subheader>
+                                {props.channel.members.length} User{props.channel.members.length === 1 ? "" : "s"}
+                            </Header.Subheader>
+                        )}
+                    </Header>
+                    {!props.isPrivateChat && (
+                        <Button onClick={props.displaySourceFiles}>view contents </Button>
+                    )}
+                    <Header floated="right">
+                        <Input
+                            name="search"
+                            icon="search"
+                            placeholder="Search Messages"
+                            size="mini"
+                            onChange={props.searchTermChange}
+                        />
+                    </Header>
                 </Segment>
-            )}
-                  </>      }
+                {isInfoVisible && (
+                    <Segment>
+                        <Header>Description:</Header>
+                        <p>{props.channel?.description || ''}</p>
+                        <Header>Members:</Header>
+                        <div>
+                            {props.channel?.members?.map((member, index) => (
+                                <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                                    <Image src={member.photoURL} avatar />
+                                    <span>{member.displayName}</span>
+                                    {/* <Button icon="remove" size="mini" onClick={() => handleRemoveMember(member)} /> */}
+                                    <RemoveButton onClick={() => handleRemoveMember(member)}>Remove</RemoveButton>
+                                </div>
+                            ))}
+                        </div>
+                    </Segment>
+                )}
+            </>}
         </>
     );
 };

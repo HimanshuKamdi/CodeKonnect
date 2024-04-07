@@ -90,14 +90,46 @@ const Channels = (props) => {
         return channelAddState && channelAddState.name && channelAddState.description;
     }
 
+    const handleChannelButtonClick = (channel) => {
+
+        const fetchRepositoryContents = async (owner, repo) => {
+            const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents`);
+            if (response.ok) {
+                const contents = await response.json();
+                return contents;
+            } else {
+                throw new Error('Failed to fetch repository contents');
+            }
+        };
+
+    let repo = "repo name from channel";
+    let owner = "owner username from channel";
+
+    fetchRepositoryContents(owner, repo)
+            .then(contents => {
+                // Display repository contents in your UI
+                const contentsList = document.getElementById('contentsList');
+
+                contents.forEach(content => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = content.name;
+                    contentsList.appendChild(listItem);
+                });
+            })
+            .catch(error => {
+                // Handle error
+                console.error(error);
+            });
+    };
+
     const displayChannels = () => {
         if (channelsState.length > 0) {
             const favoriteChannelsIds = Object.keys(props.favouriteChannels);
-
+    
             // Separate favorite channels from non-favorite channels
             const favoriteChannels = [];
             const nonFavoriteChannels = [];
-
+    
             channelsState.forEach(channel => {
                 if (favoriteChannelsIds.includes(channel.id)) {
                     favoriteChannels.push(channel);
@@ -105,11 +137,11 @@ const Channels = (props) => {
                     nonFavoriteChannels.push(channel);
                 }
             });
-
-            // Combine favorite and non-favorite channels for rendering
-            const combinedChannels = [...favoriteChannels, ...nonFavoriteChannels];
-
-            return combinedChannels.map(channel => {
+            console.log("favoriteChannels", favoriteChannels);
+            console.log("nonFavoriteChannels", nonFavoriteChannels);
+    
+            // Render favorite channels
+            const favoriteChannelsElements = favoriteChannels.map(channel => {
                 if (channel.members && props.user && channel.members.some(member => member.uid === props.user.uid)) {
                     return (
                         <Menu.Item
@@ -124,16 +156,39 @@ const Channels = (props) => {
                                 notificationChannelId={channel.id}
                                 displayName={"# " + channel.name}
                             />
-                            {favoriteChannelsIds.includes(channel.id) ? (
-                                <span style={{ float: "right", fontSize: "1em", marginRight: '0.5em' }}>&#9733;</span> // Render a star for favorite channels
-                            ) : null}
+                            <span style={{ float: "right", fontSize: "1em", marginRight: '0.5em' }}>&#9733;</span>
                         </Menu.Item>
                     );
                 }
-                return null;
             });
+    
+            // Render non-favorite channels
+            const nonFavoriteChannelsElements = nonFavoriteChannels.map(channel => {
+                if (channel.members && props.user && channel.members.some(member => member.uid === props.user.uid)) {
+                    return (
+                        <Menu.Item
+                            key={channel.id}
+                            name={channel.name}
+                            onClick={() => selectChannel(channel)}
+                            active={props.channel && channel.id === props.channel.id && !props.channel.isFavourite}
+                        >
+                            <Notification
+                                user={props.user}
+                                channel={props.channel}
+                                notificationChannelId={channel.id}
+                                displayName={"# " + channel.name}
+                            />
+                        </Menu.Item>
+                    );
+                }
+            });
+    
+            // Concatenate favorite and non-favorite channels elements
+            return [...favoriteChannelsElements, ...nonFavoriteChannelsElements];
         }
+        return null; // Return null if no channels
     };
+    
 
 
 

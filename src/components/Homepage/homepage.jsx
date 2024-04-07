@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Switch, Route, withRouter } from "react-router
 import { Provider, connect } from "react-redux";
 import firebase from "../../firebase";
 import { Grid } from 'semantic-ui-react';
+import "./homepage.css";
 
 const usersRef = firebase.database().ref("users");
 

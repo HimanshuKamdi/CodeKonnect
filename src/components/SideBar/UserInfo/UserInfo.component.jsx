@@ -7,6 +7,11 @@ import { setUser, setUsers, setChannel } from "../../../store/actioncreator";
 
 import "./UserInfo.css";
 
+const connectedRef = firebase.database().ref(".info/connected");
+
+const statusRef = firebase.database().ref("status");
+
+
 const UserInfo = (props) => {
 
 
@@ -18,6 +23,12 @@ const UserInfo = (props) => {
     }
 
     const signOut = () => {
+        connectedRef.on("value", snap => {
+            if (props.user && snap.val()) {
+                const userStatusRef = statusRef.child(props.user.uid);
+                userStatusRef.remove();
+            }
+        })
         firebase.auth()
             .signOut()
             .then(() => console.log("user signed out")            

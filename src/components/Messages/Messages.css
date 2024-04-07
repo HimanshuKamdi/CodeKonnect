@@ -1,3 +1,7 @@
+.messages{
+    width: calc(100vw - 380px);
+}
+
 .messagecontent{
     height: 500px;
     overflow-y: scroll;

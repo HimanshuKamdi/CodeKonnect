@@ -7,7 +7,7 @@ import 'codemirror/addon/edit/closetag';
 import 'codemirror/addon/edit/closebrackets';
 import ACTIONS from '../../socket_io/actions';
 
-const Editor = ({ socketRef, roomId, onCodeChange }) => {
+const Editor = ({ socketRef, roomId, onCodeChange, fileContent }) => {
     const editorRef = useRef(null);
 
     useEffect(() => {
@@ -22,9 +22,11 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
                     autoCloseTags: true,
                     autoCloseBrackets: true,
                     lineNumbers: true,
-                    value:fileContent
+                    value:fileContent,
+                    height: "90vh"
                 }
             );
+            editorRef.current.setSize(null, "100vh");
 
             editorRef.current.on('change', (instance, changes) => {
                 const { origin } = changes;
@@ -55,7 +57,7 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
         };
     }, [socketRef.current]);
 
-    return <textarea id="realtimeEditor"></textarea>;
+    return <textarea id="realtimeEditor" value={fileContent} style={{height:"90vh"}}></textarea>;
 };
 
 export default Editor;
