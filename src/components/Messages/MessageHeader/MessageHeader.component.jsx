@@ -49,13 +49,13 @@ const MessageHeader = (props) => {
                 <Header floated="left" fluid as="h2">
                     <span>
                         {(props.isPrivateChat ? "@ " : "# ") + props.channelName}
-                        {!props.isPrivateChat && (
+                        {/* {!props.isPrivateChat && (
                             <Icon
                                 onClick={props.starChange}
                                 name={props.starred ? "star" : "star outline"}
                                 color={props.starred ? "yellow" : "black"}
                             />
-                        )}
+                        )} */}
                     </span>
                     {!props.isPrivateChat && (
                         <Header.Subheader>
