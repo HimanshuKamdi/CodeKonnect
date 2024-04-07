@@ -82,11 +82,13 @@ const favouriteChannelReducer = (state = defaultFavouriteChannelState, action) =
         let payload = action.payload.favouriteChannel;
         let updatedState = { ...state.favouriteChannel };
         updatedState[payload.channelId] = payload.channelName;
+        console.log('Updated favorite channels:', updatedState);
         return { favouriteChannel: updatedState };
     } else if (action.type === REMOVE_FAVOURITECHANNEL) {
         let payload = action.payload.favouriteChannel;
         let updatedState = { ...state.favouriteChannel };
         delete updatedState[payload.channelId];
+        console.log('Updated favorite channels:', updatedState);
         return { favouriteChannel: updatedState };
     }
     return state;
