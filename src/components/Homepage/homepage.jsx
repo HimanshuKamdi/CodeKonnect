@@ -4,12 +4,13 @@ import Messages from "../Messages/Messages.component"
 import { Menu, Icon, Modal, Button, Form, Segment } from 'semantic-ui-react';
 import { BrowserRouter as Router, Switch, Route, withRouter } from "react-router-dom";
 import { Provider, connect } from "react-redux";
+import { Toaster } from 'react-hot-toast';
 import firebase from "../../firebase";
 import { Grid } from 'semantic-ui-react';
 import "./homepage.css";
+import Files from '../Files/files';
 
 const usersRef = firebase.database().ref("users");
-
 
 function Homepage(props) {
   const [count, setCount] = useState(0);
@@ -17,12 +18,12 @@ function Homepage(props) {
   const [gitDetails, setGitDetails] = useState({ gitHubUsername: "", gitHubToken: "" });
 
   useEffect(() => {
-    console.log("Homepage.js useEffect");
+    // console.log("Homepage.js useEffect");
     if (count === 0 && props.user && !props.user.gitHub) {
-      console.log("props", props.user);
+      // console.log("props", props.user);
       setModalOpen(true);
       setCount(count + 1);
-      console.log("App.js useEffect count", count);
+      // console.log("App.js useEffect count", count);
     }
   }, [props.user]);
 
@@ -65,10 +66,24 @@ function Homepage(props) {
     <>
     {props.user && (
       <>
+      <div>
+                <Toaster
+                    position="top-right"
+                    toastOptions={{
+                        success: {
+                            theme: {
+                                primary: '#4aed88',
+                            },
+                        },
+                    }}
+                ></Toaster>
+            </div>
       <Grid columns="equal">
         <SideBar />
         <Grid.Column className="messagepanel" style={{paddingLeft: "300px", marginRight: "20px"}}>
-          <Messages />
+          {!props.channel?.showFiles && !props.channel?.showCommits ?
+          <Messages /> : <Files />
+}
         </Grid.Column>
 
       </Grid>
@@ -119,7 +134,13 @@ function Homepage(props) {
 const mapStateToProps = (state) => {
   return {
     user: state.user.currentUser,
-  }
-}
+    channel: {
+      ...state.channel.currentChannel,
+      showFiles: state.channel.showFiles,
+      showCommits: state.channel.showCommits
+    }
+  };
+};
+
 
 export default connect(mapStateToProps)(Homepage);

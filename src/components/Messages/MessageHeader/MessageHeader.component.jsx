@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Segment, Header, Input, Icon, Image, Button } from 'semantic-ui-react';
+// import "../Messages.css";
 import styled from 'styled-components';
 
 // Define styled button component
@@ -20,6 +21,7 @@ const RemoveButton = styled.button`
 
 const MessageHeader = (props) => {
     const [isInfoVisible, setIsInfoVisible] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
 
     console.log("MessageHeader props:", props);
 
@@ -41,6 +43,24 @@ const MessageHeader = (props) => {
         console.log("Remove member:", member);
 
     };
+
+    const handleMouseEnter = () => {
+        setIsHovered(true);
+    };
+    
+    const handleMouseLeave = () => {
+       setIsHovered(false);
+    };
+
+    const buttonStyle = {
+        backgroundColor: isHovered ? '#51a2a5' : '#146568',
+        color: 'white',
+        border: 'none',
+        borderRadius: '5px',
+        padding: '10px 20px',
+        cursor: 'pointer',
+        transition: 'background-color 0.3s ease-in-out', // Add transition effect
+      };
 
     return (
         <>
@@ -66,7 +86,7 @@ const MessageHeader = (props) => {
                         )}
                     </Header>
                     {!props.isPrivateChat && (
-                        <Button onClick={props.displaySourceFiles}>view contents </Button>
+                        <Button onClick={props.displaySourceFiles} className='fileInterface' style={buttonStyle}  onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>File Interface</Button>
                     )}
                     <Header floated="right">
                         <Input

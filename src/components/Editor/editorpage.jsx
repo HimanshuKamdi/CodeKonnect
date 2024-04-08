@@ -1,90 +1,66 @@
 import React, { useState, useRef, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import ACTIONS from '../../socket_io/actions';
-import Client from './client';
 import Editor from './editor';
 import { useHistory } from "react-router-dom";
-import { initSocket } from '../../socket_io/socket';
-import {
-    useLocation,
-    useNavigate,
-    Navigate,
-    useParams,
-} from 'react-router-dom';
+import { connect } from "react-redux";
+import { useLocation, useParams, } from 'react-router-dom';
+import firebase from "../../firebase";
+import { Image } from 'semantic-ui-react';
 import "./editorpage.css";
 
 function EditorPage(props) {
     const history = useHistory();
-    const socketRef = useRef(null);
     const codeRef = useRef(null);
-    const location = useLocation();
-    const { roomId } = useParams();
     const [clients, setClients] = useState([]);
-    const { fileContent } = props.location.state;
+    const { filePath } = props.location.state;
+    const [editedBy, setEditedBy] = useState("");
+
+    const filesRef = firebase.database().ref('files');
+    const filesPathRef = filesRef.child(props.channel.id).child(filePath);
 
     useEffect(() => {
-        const init = async () => {
-            socketRef.current = await initSocket();
-            socketRef.current.on('connect_error', (err) => handleErrors(err));
-            socketRef.current.on('connect_failed', (err) => handleErrors(err));
-
-            function handleErrors(e) {
-                console.log('socket error', e);
-                toast.error('Socket connection failed, try again later.');
-                // reactNavigator('/');
+        filesPathRef.child('connectedUsers').on('value', (snap) => {
+            const connectedUsers = snap.val();
+            if (connectedUsers) {
+                setClients(connectedUsers);
             }
-
-            socketRef.current.emit(ACTIONS.JOIN, {
-                roomId,
-                username: location.state?.username,
-            });
-
-            socketRef.current.on(
-                ACTIONS.JOINED,
-                ({ clients, username, socketId }) => {
-                    if (username !== location.state?.username) {
-                        toast.success(`${username} joined the room.`);
-                        console.log(`${username} joined`);
-                    }
-                    setClients(clients);
-                    socketRef.current.emit(ACTIONS.SYNC_CODE, {
-                        code: codeRef.current,
-                        socketId,
-                    });
-                }
-            );
-
-            // Listening for disconnected
-            socketRef.current.on(
-                ACTIONS.DISCONNECTED,
-                ({ socketId, username }) => {
-                    toast.success(`${username} left the room.`);
-                    setClients((prev) => {
-                        return prev.filter(
-                            (client) => client.socketId !== socketId
-                        );
-                    });
-                }
-            );
-        };
-        init();
-        return () => {
-            socketRef.current.disconnect();
-            socketRef.current.off(ACTIONS.JOINED);
-            socketRef.current.off(ACTIONS.DISCONNECTED);
-        };
+        });
+        filesPathRef.child('editedBy').on('value', (snap) => {
+            const editedBy = snap.val();
+            if (editedBy) {
+                setEditedBy(editedBy);
+            }
+        });
     }, []);
 
     function leaveRoom() {
-        history.goBack(); 
+        filesPathRef.child('connectedUsers').transaction(connectedUsers => {
+            if (connectedUsers) {
+              const updatedUsers = connectedUsers.filter(user => user.uid !== props.user.uid);
+              return updatedUsers;
+            } else {
+              return connectedUsers;
+            }
+          }).then(() => {
+          }).catch(error => {
+            console.error("Error removing user from connected users:", error);
+          });
+          filesPathRef.child("editedBy").set("");
+          history.goBack();
+        };
+
+
+
+    if (props.user){
+        if(!props.channel){
+            history.push("/");
+        }
     }
 
-    if (!location.state) {
-        // return <Navigate to="/" />;
-    }
-
-    return (
-        <div className="mainWrap">
+    return (<>
+        {
+        props?.channel && (
+            <div className="mainWrap">
             <div className="aside">
                 <div className="asideInner">
                     <div className="logo">
@@ -96,11 +72,12 @@ function EditorPage(props) {
                     </div>
                     <h3>Connected</h3>
                     <div className="clientsList">
-                        {clients.map((client) => (
-                            <Client
-                                key={client.socketId}
-                                username={client.username}
-                            />
+                        {clients.map((client) => (                            
+                            <span>
+                            <Image src={client.photoURL} avatar></Image>
+                            {client.displayName}
+                            {client.uid === editedBy && <span> (editing)</span>}
+                        </span>
                         ))}
                     </div>
                 </div>
@@ -109,17 +86,24 @@ function EditorPage(props) {
                 </button>
             </div>
             <div className="editorWrap">
-                <Editor
-                    socketRef={socketRef}
-                    roomId={roomId}
-                    onCodeChange={(code) => {
-                        codeRef.current = code;
-                    }}
-                    fileContent={fileContent}                    
+                    <Editor
+                    filePathRef={filesPathRef}
+                    user={props.user.uid}
                 />
             </div>
         </div>
+        )
+    }
+    </>       
     );
 };
 
-export default EditorPage;
+
+const mapStateToProps = (state) => {
+    return {
+        user: state.user.currentUser,
+        channel: state.channel.currentChannel,
+    }
+}
+
+export default connect(mapStateToProps)(EditorPage);

@@ -15,9 +15,9 @@ const PrivateChat = (props) => {
 
     const usersRef = firebase.database().ref("users");
 
-    const connectedRef = firebase.database().ref(".info/connected");
-
     const statusRef = firebase.database().ref("status");
+    
+    const connectedRef = firebase.database().ref(".info/connected");
 
     useEffect(() => {
         usersRef.on('child_added', (snap) => {
@@ -60,7 +60,6 @@ const PrivateChat = (props) => {
     useEffect(() => {
 
         statusRef.on("child_added", snap => {
-            console.log("Connected", snap.key);
             setConnectedUsersState((currentState) => {
                 let updatedState = [...currentState];
                 updatedState.push(snap.key);
@@ -69,7 +68,6 @@ const PrivateChat = (props) => {
         });
 
         statusRef.on("child_removed", snap => {
-            console.log("Disconnected", snap.key);
             setConnectedUsersState((currentState) => {
                 let updatedState = [...currentState];
 
@@ -102,10 +100,12 @@ const PrivateChat = (props) => {
         }
     }
 
+    
+
     const selectUser = (user) => {
-        console.log(user);
+        // console.log(user);
         let userTemp = { ...user };
-        console.log("Temp",userTemp);
+        // console.log("Temp",userTemp);
         userTemp.id = generateChannelId(user.id);
         if (props.channel !==null){
             setLastVisited(props.user, props.channel);

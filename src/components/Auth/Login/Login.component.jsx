@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Grid, Form, Segment, Header, Icon, Button, Message, Image } from 'semantic-ui-react'
+import { Grid, Form, Segment, Header, Button, Message, Image } from 'semantic-ui-react'
 import { Link } from 'react-router-dom'
 
 import google from './google.png';
 import loginImg from './login_image.avif';
-
+import CustomIcon from '../../SideBar/UserInfo/image/black_logo.png';
 import firebase from '../../../firebase';
 import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
@@ -34,7 +34,7 @@ const Login = () => {
 
     const checkForm = () => {
         if (isFormEmpty()) {
-            seterrorState((error) => error.concat({ message: "Please fill in all fields" }));
+            seterrorState((error) => error.concat(["Please fill in all fields" ]));
             return false;
         }
         return true;
@@ -46,7 +46,7 @@ const Login = () => {
     }
 
     const formaterrors = () => {
-        return errorState.map((error, index) => <p key={index}>{error.message}</p>)
+        return errorState.map((error, index) => <h4 key={index}>{error}</h4>)
     }
 
     const onSubmit = (event) => {
@@ -59,11 +59,25 @@ const Login = () => {
                     setIsLoading(false);
                     // console.log(user);
                 })
-                .catch(serverError => {
+                .catch(error => {
                     setIsLoading(false);
-                    seterrorState((error) => error.concat(serverError));
+                    if (error.code === "auth/internal-error") {
+                        // User not found in the Firebase database
+                        // Display a message to prompt the user to register
+                        seterrorState(["Wrong Username OR Password.."]);
+                    } else {
+                        // Other errors
+                        seterrorState((prevErrors) => prevErrors.concat(error.message));
+                    }
+                    console.log(error);
+                    // seterrorState(["User not found. Please register."]);
+                    // seterrorState((error) => error.concat(serverError));
+                    
                 })
 
+        }
+        else{
+            formaterrors();
         }
     }
 
@@ -114,12 +128,35 @@ const Login = () => {
     //       });
     // };
 
+    const handleForgotPassword = () => {
+        // Implement forgot password functionality here
+        firebase.auth().sendPasswordResetEmail(userState.email)
+            .then(() => {
+                // Password reset email sent successfully
+                // Provide feedback to the user
+                alert("Password reset email sent. Check your email inbox.");
+            })
+            .catch((error) => {
+                // Handle errors if password reset email fails to send
+                console.error("Error sending password reset email:", error);
+                if (error.code === "auth/user-not-found") {
+                    alert("No user with that email address found. Please check your email address.");
+                } else {
+                    alert("Error sending password reset email. Please try again later.");
+                }
+            });
+    };
+    
+
     return (
         <Grid verticalAlign="middle" textAlign="center" className="grid-form" style={{ backgroundColor: 'white' }}>
             <Grid.Column width={8} style={{ maxWidth: '400px' }}>
                 <Header icon as="h2">
-                    <Icon name="slack" />
-                    <span style={{ color: '#1a244a' }}>Login</span>
+                    <img src={CustomIcon} style={{ height: "100px", width: "120px", marginTop: "20px" }} alt="Icon"  />
+                    <Header>
+                        <span style={{ color: '#1a244a' }}>Login</span>
+                    </Header>
+                    
                 </Header>
                 <Form onSubmit={onSubmit} >
                     <Segment stacked style={{ backgroundColor: '#ddedec' }}>
@@ -154,13 +191,12 @@ const Login = () => {
                     </Segment>
                     <Button disabled={isLoading} loading={isLoading} style={{ backgroundColor: '#3b969a' }}>Login</Button>
                 </Form>
-                {errorState.length > 0 && <Message error>
-                    <h3>Errors</h3>
+                {errorState.length > 0 && <Message error className="error-message">
                     {formaterrors()}
                 </Message>
                 }
                 <Message style={{ backgroundColor: '#ddedec' }}>
-                    Not an User? <Link to="/register" >Register </Link>
+                    Not an User? <Link to="/register" >Register </Link> | <Link to="#" onClick={handleForgotPassword}>Forgot Password?</Link>
                 </Message>
             </Grid.Column>
             <Grid.Column width={8}>
@@ -168,6 +204,7 @@ const Login = () => {
             </Grid.Column>
         </Grid>
     );
+
 }
 
 const mapStateToProps = (state) => {
