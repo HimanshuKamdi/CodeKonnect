@@ -60,7 +60,6 @@ const PrivateChat = (props) => {
     useEffect(() => {
 
         statusRef.on("child_added", snap => {
-            console.log("Connected", snap.key);
             setConnectedUsersState((currentState) => {
                 let updatedState = [...currentState];
                 updatedState.push(snap.key);
@@ -69,7 +68,6 @@ const PrivateChat = (props) => {
         });
 
         statusRef.on("child_removed", snap => {
-            console.log("Disconnected", snap.key);
             setConnectedUsersState((currentState) => {
                 let updatedState = [...currentState];
 
