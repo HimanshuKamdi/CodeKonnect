@@ -1,13 +1,16 @@
 import React, { useRef, useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { SideBar } from "../SideBar/SideBar.component";
+// import MessageHeader from "../Messages/MessageHeader/MessageHeader.component";
 import firebase from "../../firebase";
 import { useHistory } from 'react-router-dom';
 import { setfavouriteChannel, removefavouriteChannel, updateChannelMembers, } from "../../store/actioncreator";
+// import "../Messages/Messages.css";
 import "./RepositoryContents.css";
 import { FileUpload } from "../Messages/MessageUpload/FileUpload.component";
 import { CommitPopup } from "./Commitpopup.component.jsx";
 import { Button, Input } from "semantic-ui-react";
+import uuidv4 from "uuid/v4";
 
 const Files = (props) => {
   const history = useHistory();
@@ -21,6 +24,7 @@ const Files = (props) => {
   const channelFilesRef = filesRef.child(props.channel.id);
 
   const [messagesState, setMessagesState] = useState([]);
+  const [searchTermState, setSearchTermState] = useState("");
   const [fileDialogState, setFileDialog] = useState(false);
   const [showCommitHistory, setShowCommitHistory] = useState(false);
   const [commitMessage, setCommitMessage] = useState("");
@@ -290,43 +294,21 @@ const Files = (props) => {
   };
 
   const uploadFile = (file) => {
-    // console.log("curDir", currentDirectory);
-    // var path = currentDirectory ? `${currentDirectory}/${file.name}` : file.name;  
-    // path = path.replace(/[.#$/\[\]]/g, "_");
-    // const filePath = `chat/files/${path}_${file.name}`;
-    const fileReader = new FileReader();  
-    fileReader.onload = (event) => {
-      const fileContent = event.target.result;
-
-      // storageRef
-      //   .child(filePath)
-      //   .put(file)
-      //   .then((data) => {
-      //     data.ref
-      //       .getDownloadURL()
-      //       .then((url) => {
-      //         console.log("url", url);
-      //         const fileRef = channelFilesRef.child(path);
-      //         fileRef.set({
-      //           fileName: file.name,
-      //           downloadUrl: url,
-      //           path: path,
-      //           fileContent: fileContent,
-      //           connectedUsers: [],
-      //           changes: [],
-      //           editedBy: "",
-      //           edited: false,
-      //           type: "file",
-      //         })
-      //           .catch((err) => console.log(err));
-      //       })
-      //       .catch((err) => console.log(err));
-      //   })
-      //   .catch((err) => console.log(err));
-      handleUploadCommit(`Uploading ${file.name}...`,file,fileContent);
-    };
-    
-    fileReader.readAsText(file);
+    const filePath = `chat/files/${uuidv4()}_${file.name}`;
+    // setMessageState(file.name);
+    storageRef
+      .child(filePath)
+      .put(file)
+      .then((data) => {
+        data.ref
+          .getDownloadURL()
+          .then((url) => {
+            //sendFile(url, file.name);
+            // console.log("URL",url);
+          })
+          .catch((err) => console.log(err));
+      })
+      .catch((err) => console.log(err));
   };
 
   const resetChangedFiles = () => {
@@ -487,32 +469,31 @@ const Files = (props) => {
 
   
 
-  const handleDownload = async (downloadUrl, inputFileName) => {
-    try {
-      const response = await fetch(downloadUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch file: ${response.status}`);
-      }
-
-      const content = await response.text();
-
-      const lastDotIndex = inputFileName.lastIndexOf('.');
-      const fileName = inputFileName.substring(0, lastDotIndex);
-      const fileExtension = inputFileName.substring(lastDotIndex + 1);
-      const blob = new Blob([content], { type: `text/${fileExtension}` });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', inputFileName);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error downloading file:', error);
+  const handleDownload = (filename) => {
+    if (!filename) {
+      console.error("Filename is required for download.");
+      return;
     }
-  };
 
+    const baseUrl = window.location.origin;
+    const download_url = `${baseUrl}/${filename}`;
+
+    console.log("Download url: ", download_url);
+
+    // Create an anchor element to initiate download
+    const aTag = document.createElement("a");
+    aTag.href = download_url;
+    aTag.setAttribute("download", filename);
+
+    // Listen for download errors
+    aTag.addEventListener("error", (error) => {
+      console.error("Error occurred during download:", error);
+    });
+
+    document.body.appendChild(aTag);
+    aTag.click();
+    aTag.remove();
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -524,7 +505,7 @@ const Files = (props) => {
 
   return (
     <>
-      <div className="header_section">
+       <div className="header_section">
         <button className="commit_btn" onClick={() => setFileDialog(true)}>
           Upload File
         </button>
@@ -534,85 +515,49 @@ const Files = (props) => {
           onClose={() => setFileDialog(false)}
         />
 
-        <button className="commit_btn" onClick={toggleCommitHistory}>
-          {showCommitHistory ? "Hide Commit History" : "View Commit History"}
-        </button>
-        <button className="commit_btn" onClick={toggleCommitPopup}>
-          Add Commit
-        </button>
-        <CommitPopup
-          open={showCommitPopup}
-          onClose={toggleCommitPopup}
-          onCommit={(commitMessage) => {
-            handle_Commit(commitMessage);
-            addCommitToHistory({
-              commit: {
-                author: {
-                  name: props.user.displayName,
-                },
-                message: commitMessage,
-              }
-            });
-          }}
-          channelFilesRef={channelFilesRef}
-        />
+        <button className="commit_btn">View Commit History</button>
+        <button className="commit_btn">Add Commit</button>
       </div>
 
-      {showCommitHistory ? (
-        <div>
-          <h2>Commit History:</h2>
-          <ul>
-            {commitHistory.map((commit, index) => (
-              <React.Fragment key={commit.sha}>
-                {index > 0 &&
-                  commitHistory[index - 1].commit.author.name !==
-                  commit.commit.author.name && (
-                    <hr />
-                  )}
-                <li>
-                  {commit.commit.author.name}: {commit.commit.message}
-                </li>
-              </React.Fragment>
-            ))}
-          </ul>
-        </div>
-      ) :
-        (
-          <div className="repository-contents">
-            <h1>Repository Contents</h1>
-            <ul>
-              {currentDirectory && (
-                <li key="Go Up">
-                  <button onClick={navigateUp}>..</button>
-                </li>
+      <div className="repository-contents">
+        <h1>Repository Contents</h1>
+        <ul>
+          {currentDirectory && (
+            <li key="Go Up">
+              <button onClick={navigateUp}>..</button>
+            </li>
+          )}
+          {repoContents.map((content) => (
+            <li key={content.name}>
+              {content.type === "dir" ? (
+                <button
+                  onClick={() => handleDirectoryClick(content.path)}
+                  className="directory-button"
+                >
+                  {content.name} (Directory)
+                </button>
+              ) : (
+                <div className="file-list">
+                  <button
+                    onClick={() => handleItemClick(content)}
+                    className="file-button"
+                  >
+                    {content.name} (File)
+                  </button>
+
+                  <Button
+                    icon="download"
+                    onClick={() => handleDownload(content.name)}
+                    style={{ backgroundColor: "#64CCC5", marginLeft: "auto" }}
+                  />
+                </div>
               )}
-              {repoContents.map((content) => (
-                <li key={content.name}>
-                  {content.type === "dir" ? (
-                    <button
-                      onClick={() => handleDirectoryClick(content)}
-                      className="directory-button"
-                    >
-                      {content.name} (Directory)
-                    </button>
-                  ) : (
-                    <div className="file-list">
-                      <button
-                        onClick={() => handleItemClick(content)}
-                        className="file-button"
-                      >
-                        {content.name} (File)
-                      </button>
+            </li>
+          ))}
+        </ul>
+      </div>
 
-                      <Button icon="download" onClick={() => handleDownload(content.download_url, content.name)} style={{ marginLeft: "auto", backgroundColor: "#64CCC5" }} />
-
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+      <SideBar />
     </>
   );
 };

@@ -1,6 +1,6 @@
-.header_section{
-  width: 70vw;
-  /* margin-left: 330px; */
+.header_section {
+  width: 870px;
+  margin-left: 330px;
   border: 1px solid #ccc;
   border-radius: 5px;
   height: 100px;
@@ -11,38 +11,35 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-
 .commit_btn {
-  background-color: #053B50;
-  color: white; 
+  background-color: #053b50;
+  color: white;
   border: none;
-  padding: 20px 35px; 
+  padding: 20px 35px;
   font-size: medium;
   cursor: pointer;
   transition: background-color 0.3s;
   margin-left: 20px;
   margin-right: 20px;
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease-in-out; 
+  transition: all 0.3s ease-in-out;
 
   &:hover {
-    background-color: #176B87;
+    background-color: #176b87;
     transform: scale(1.05);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
 }
 
-
-
 .repository-contents {
   position: absolute;
-  top: 150px; 
-  /* left: 330px; */
+  top: 150px;
+  left: 330px;
   padding: 20px;
-  background-color: #EEEEEE;
+  background-color: #eeeeee;
   border: 1px solid #ccc;
   border-radius: 5px;
-  width: 70vw;
+  width: 870px;
 }
 
 .repository-contents h1 {
@@ -60,7 +57,7 @@
 }
 
 .repository-contents button {
-  background-color: #176B87;
+  background-color: #176b87;
   color: #fff;
   border: none;
   border-radius: 5px;
@@ -69,12 +66,10 @@
 }
 
 .repository-contents button:hover {
-  background-color: #64CCC5;
+  background-color: #64ccc5;
 }
-
 
 .file-list {
   display: flex;
   align-items: center;
 }
-
