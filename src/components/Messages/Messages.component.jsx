@@ -3,14 +3,14 @@ import MessageHeader from './MessageHeader/MessageHeader.component';
 import MessageContent from "./MessageContent/MessageContent.component";
 import MessageInput from "./MessageInput/MessageInput.component";
 import { connect } from "react-redux";
-import { setfavouriteChannel, removefavouriteChannel, updateChannelMembers, setChannel } from "../../store/actioncreator";
+import { setfavouriteChannel, removefavouriteChannel, updateChannelMembers } from "../../store/actioncreator";
 import firebase from "../../firebase";
 import { Segment, Comment } from 'semantic-ui-react';
 import "./Messages.css"; 
 import { withRouter } from 'react-router-dom';
 
 const Messages = (props) => {
-    // console.log("Messages props",props);
+    console.log("Messages props",props);
 
     const messageRef = firebase.database().ref('messages');
 
@@ -93,7 +93,7 @@ const Messages = (props) => {
     }
 
     const starChange = () => {
-        // console.log("Star change");
+        console.log("Star change");
         let favouriteRef = usersRef.child(props.user.uid).child("favourite").child(props.channel.id);
         if (isStarred()) {
             favouriteRef.remove();
@@ -103,17 +103,14 @@ const Messages = (props) => {
     }
 
     const isStarred = () => {
-        // console.log("Is starred");
-        // console.log(props.favouriteChannels);
+        console.log("Is starred");
+        console.log(props.favouriteChannels);
         return Object.keys(props.favouriteChannels).includes(props.channel?.id);
     }
 
     const displaySourceFiles = () => {
-        var channel = props.channel;
-        channel.showFiles = true;
-        channel.showCommits = false;
-        console.log("Display source files",channel);
-        props.setChannel(channel);
+        console.log("Display source files");
+        props.history.push(`/files/${props.channel.name}`);
     };
 
     return <div className="messages">
@@ -146,7 +143,6 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        setChannel: (channel) => dispatch(setChannel(channel)),
         setfavouriteChannel: (channel) => dispatch(setfavouriteChannel(channel)),
         removefavouriteChannel: (channel) => dispatch(removefavouriteChannel(channel)),
         updateChannelMembers: (channelId, updatedMembers) => dispatch(updateChannelMembers(channelId, updatedMembers))

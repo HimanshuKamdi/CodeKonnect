@@ -42,6 +42,7 @@ function EditorPage(props) {
               return connectedUsers;
             }
           }).then(() => {
+            console.log("User removed from connected users successfully.");
           }).catch(error => {
             console.error("Error removing user from connected users:", error);
           });

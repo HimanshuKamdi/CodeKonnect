@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { Grid, Form, Segment, Header, Button, Message } from 'semantic-ui-react'
+import { Grid, Form, Segment, Header, Icon, Button, Message } from 'semantic-ui-react'
 import firebase from '../../../firebase';
-import CustomIcon from '../../SideBar/UserInfo/image/black_logo.png';
 
-import "../Auth.css";
+import "../Auth.css"
 import { Link } from 'react-router-dom';
 import loginImg from './login_image.avif';
 
@@ -102,7 +101,6 @@ const Register = () => {
         }
     }
 
-
     const saveUserInDB = (createdUser) => {
         setIsLoading(true);
         userCollectionRef.child(createdUser.user.uid).set({
@@ -120,7 +118,7 @@ const Register = () => {
     }
 
     const formaterrors = () => {
-        return errorState.map((error, index) => <h4 key={index}>{error.message}</h4>)
+        return errorState.map((error, index) => <p key={index}>{error.message}</p>)
     }
 
     return (<Grid verticalAlign="middle" textAlign="center" className="grid-form" style={{ backgroundColor: 'white' }}>
@@ -129,10 +127,8 @@ const Register = () => {
         </Grid.Column>
         <Grid.Column width={8} style={{ maxWidth: '500px' }}>
             <Header icon as="h2">
-                <img src={CustomIcon} style={{ height: "100px", width: "120px", marginTop: "20px" }} alt="Icon"  />
-                <Header>
-                    <span style={{ color: '#1a244a' }}>Register</span>
-                </Header>
+                <Icon name="slack" />
+                <span style={{ color: '#1a244a' }}>Register</span>
             </Header>
             <Form onSubmit={onSubmit}>
                 <Segment stacked style={{ backgroundColor: '#ddedec' }}>
@@ -175,7 +171,8 @@ const Register = () => {
                 </Segment>
                 <Button disabled={isLoading} loading={isLoading} style={{ backgroundColor: '#3b969a' }}>Submit</Button>
             </Form>
-            {errorState.length > 0 && <Message error className="error-message">
+            {errorState.length > 0 && <Message error style={{ backgroundColor: '#ddedec' }}>
+                <h3>Errors</h3>
                 {formaterrors()}
             </Message>
             }

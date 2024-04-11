@@ -31,23 +31,31 @@ let defaultChannelState = {
     currentChannel: null,
     loading : true,
     channelDescription: '',
-    channelMembers: [],
-    showFiles: false,
-    showCommits: false
+    channelMembers: []
 }
+
+
+// const channelReducer = (state = defaultChannelState, action) => {
+//     if (action.type === SET_CHANNEL) {
+//         console.log('Handling SET_CHANNEL action with payload:', action.payload);
+//         let payload = action.payload;
+//         state = { ...state, currentChannel: payload.currentChannel };
+//         return state;
+//     }
+//     return state;
+// }
 
 const channelReducer = (state = defaultChannelState, action) => {
     if (action.type === SET_CHANNEL) {
+        // console.log('Handling SET_CHANNEL action with payload:', action.payload);
         const payload = action.payload;
-        const { currentChannel, channelDescription, channelMembers, showFiles, showCommits } = payload;
+        const { currentChannel, channelDescription, channelMembers } = payload;
         return {
             ...state,
             currentChannel,
-            channelDescription, 
-            channelMembers, 
-            showFiles, 
-            showCommits,
-            loading: false 
+            channelDescription, // Update channelDescription
+            channelMembers, // Update channelMembers
+            loading: false // Assuming loading should be set to false after channel is set
         };
     }else if (action.type === UPDATE_CHANNEL_MEMBERS) {
         const { channelId, updatedMembers } = action.payload;
@@ -74,11 +82,13 @@ const favouriteChannelReducer = (state = defaultFavouriteChannelState, action) =
         let payload = action.payload.favouriteChannel;
         let updatedState = { ...state.favouriteChannel };
         updatedState[payload.channelId] = payload.channelName;
+        console.log('Updated favorite channels:', updatedState);
         return { favouriteChannel: updatedState };
     } else if (action.type === REMOVE_FAVOURITECHANNEL) {
         let payload = action.payload.favouriteChannel;
         let updatedState = { ...state.favouriteChannel };
         delete updatedState[payload.channelId];
+        console.log('Updated favorite channels:', updatedState);
         return { favouriteChannel: updatedState };
     }
     return state;

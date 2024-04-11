@@ -19,14 +19,13 @@ export const setUsers = (users) => {
 }
 
 export const setChannel = (channel) => {
+    console.log('Dispatching SET_CHANNEL action with payload:', channel);
     return {
         type: SET_CHANNEL,
         payload: {
             currentChannel: channel,
             channelDescription: channel?.description,
-            channelMembers: channel?.members,
-            showFiles: channel?.showFiles ?? false,
-            showCommits: channel?.showCommits ?? false,            
+            channelMembers: channel?.members
         }
     }
 }
@@ -37,6 +36,12 @@ export const setfavouriteChannel = (channel) => {
         payload: {
             favouriteChannel: channel
         }
+        // payload: {
+        //     favouriteChannel: {
+        //         channelId: channel.id, // Make sure channel.id is correctly set
+        //         channelName: channel.name // Make sure channel.name is correctly set
+        //     }
+        // }
     }
 }
 
@@ -46,6 +51,12 @@ export const removefavouriteChannel = (channel) => {
         payload: {
             favouriteChannel: channel
         }
+        // payload: {
+        //     favouriteChannel: {
+        //         channelId: channel.id,
+        //         channelName: channel.name
+        //     }
+        // }
     }
 }
 

@@ -15,12 +15,11 @@ app.use((req, res, next) => {
 
 const userSocketMap = {};
 function getAllConnectedClients(roomId) {
-    // Map
     return Array.from(io.sockets.adapter.rooms.get(roomId) || []).map(
         (socketId) => {
             return {
                 socketId,
-                username: userSocketMap[socketId],
+                user: userSocketMap[socketId],
             };
         }
     );
@@ -29,14 +28,15 @@ function getAllConnectedClients(roomId) {
 io.on('connection', (socket) => {
     console.log('socket connected', socket.id);
 
-    socket.on(ACTIONS.JOIN, ({ roomId, username }) => {
-        userSocketMap[socket.id] = username;
+    socket.on(ACTIONS.JOIN, ({ roomId, user }) => {
+        userSocketMap[socket.id] = user;
         socket.join(roomId);
+        console.log('user joined', user, roomId);
         const clients = getAllConnectedClients(roomId);
         clients.forEach(({ socketId }) => {
             io.to(socketId).emit(ACTIONS.JOINED, {
                 clients,
-                username,
+                user,
                 socketId: socket.id,
             });
         });
@@ -52,10 +52,11 @@ io.on('connection', (socket) => {
 
     socket.on('disconnecting', () => {
         const rooms = [...socket.rooms];
+        console.log('disconnecting', userSocketMap[socket.id]);
         rooms.forEach((roomId) => {
             socket.in(roomId).emit(ACTIONS.DISCONNECTED, {
                 socketId: socket.id,
-                username: userSocketMap[socket.id],
+                user: userSocketMap[socket.id],
             });
         });
         delete userSocketMap[socket.id];

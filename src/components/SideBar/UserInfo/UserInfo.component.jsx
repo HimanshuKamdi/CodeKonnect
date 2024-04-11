@@ -42,6 +42,8 @@ const UserInfo = (props) => {
             <Grid.Column>
                 <Grid.Row className="userinfo_grid_row">
                     <Header inverted as="h2">
+                        {/* <Icon name="slack" /> */}
+                        {/* <Icon name={ CustomIcon } /> */}
                         <img src={CustomIcon} alt="Icon"  />
                         <Header.Content>CodeKonnect</Header.Content>
                         
