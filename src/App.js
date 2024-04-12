@@ -47,13 +47,13 @@ const App = (props) => {
 
   useEffect(() => {
     if (!props.channel || !props.user) {
-      history.push('/');
+      props.history.push('/');
     }
   }, [props.channel, props.user]);
 
 return (
     <div className="App">
-      <AppLoader loading={props.loading && props.location.pathname === "/"} />
+      {/* <AppLoader loading={props.loading && props.location.pathname === "/"} /> */}
       <Switch>
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />

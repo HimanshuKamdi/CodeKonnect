@@ -3,7 +3,7 @@ import MessageHeader from './MessageHeader/MessageHeader.component';
 import MessageContent from "./MessageContent/MessageContent.component";
 import MessageInput from "./MessageInput/MessageInput.component";
 import { connect } from "react-redux";
-import { setfavouriteChannel, removefavouriteChannel, updateChannelMembers } from "../../store/actioncreator";
+import { setfavouriteChannel, removefavouriteChannel, updateChannelMembers, setChannel } from "../../store/actioncreator";
 import firebase from "../../firebase";
 import { Segment, Comment } from 'semantic-ui-react';
 import "./Messages.css"; 
@@ -109,8 +109,11 @@ const Messages = (props) => {
     }
 
     const displaySourceFiles = () => {
-        console.log("Display source files");
-        props.history.push(`/files/${props.channel.name}`);
+        var channel = props.channel;
+        channel.showFiles = true;
+        channel.showCommits = false;
+        console.log("Display source files",channel);
+        props.setChannel(channel);
     };
 
     return <div className="messages">
@@ -143,6 +146,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
+        setChannel: (channel) => dispatch(setChannel(channel)),
         setfavouriteChannel: (channel) => dispatch(setfavouriteChannel(channel)),
         removefavouriteChannel: (channel) => dispatch(removefavouriteChannel(channel)),
         updateChannelMembers: (channelId, updatedMembers) => dispatch(updateChannelMembers(channelId, updatedMembers))

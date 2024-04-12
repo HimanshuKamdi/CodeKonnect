@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Codemirror from 'codemirror';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/dracula.css';
@@ -8,6 +8,8 @@ import 'codemirror/addon/edit/closebrackets';
 
 const Editor = ({ filePathRef, fileContent, user }) => {
     const editorRef = useRef(null);
+    const [edited, setEdited] = useState(false);
+
 
     useEffect(() => {
         async function init() {
@@ -52,6 +54,10 @@ const Editor = ({ filePathRef, fileContent, user }) => {
                 if (origin !== 'setValue') {
                     filePathRef.child("editedBy").set(user);
                     filePathRef.child("fileContent").set(code);
+                    if(!edited){
+                        setEdited(true);
+                        filePathRef.child("edited").set(true);
+                    }
                 }
             });
         }
