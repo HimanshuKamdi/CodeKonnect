@@ -18,12 +18,12 @@ function Homepage(props) {
   const [gitDetails, setGitDetails] = useState({ gitHubUsername: "", gitHubToken: "" });
 
   useEffect(() => {
-    console.log("Homepage.js useEffect");
+    // console.log("Homepage.js useEffect");
     if (count === 0 && props.user && !props.user.gitHub) {
-      console.log("props", props.user);
+      // console.log("props", props.user);
       setModalOpen(true);
       setCount(count + 1);
-      console.log("App.js useEffect count", count);
+      // console.log("App.js useEffect count", count);
     }
   }, [props.user]);
 

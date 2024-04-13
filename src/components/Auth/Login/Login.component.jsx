@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Grid, Form, Segment, Header, Icon, Button, Message, Image } from 'semantic-ui-react'
+import { Grid, Form, Segment, Header, Button, Message, Image } from 'semantic-ui-react'
 import { Link } from 'react-router-dom'
 
 import google from './google.png';
 import loginImg from './login_image.avif';
-
+import CustomIcon from '../../SideBar/UserInfo/image/black_logo.png';
 import firebase from '../../../firebase';
 import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
@@ -46,7 +46,7 @@ const Login = () => {
     }
 
     const formaterrors = () => {
-        return errorState.map((error, index) => <h3 key={index}>{error}</h3>)
+        return errorState.map((error, index) => <h4 key={index}>{error}</h4>)
     }
 
     const onSubmit = (event) => {
@@ -132,8 +132,11 @@ const Login = () => {
         <Grid verticalAlign="middle" textAlign="center" className="grid-form" style={{ backgroundColor: 'white' }}>
             <Grid.Column width={8} style={{ maxWidth: '400px' }}>
                 <Header icon as="h2">
-                    <Icon name="slack" />
-                    <span style={{ color: '#1a244a' }}>Login</span>
+                    <img src={CustomIcon} style={{ height: "100px", width: "120px", marginTop: "20px" }} alt="Icon"  />
+                    <Header>
+                        <span style={{ color: '#1a244a' }}>Login</span>
+                    </Header>
+                    {/* <span style={{ color: '#1a244a' }}>Login</span> */}
                 </Header>
                 <Form onSubmit={onSubmit} >
                     <Segment stacked style={{ backgroundColor: '#ddedec' }}>
@@ -168,8 +171,7 @@ const Login = () => {
                     </Segment>
                     <Button disabled={isLoading} loading={isLoading} style={{ backgroundColor: '#3b969a' }}>Login</Button>
                 </Form>
-                {errorState.length > 0 && <Message error>
-                    <h3>Errors</h3>
+                {errorState.length > 0 && <Message error className="error-message">
                     {formaterrors()}
                 </Message>
                 }

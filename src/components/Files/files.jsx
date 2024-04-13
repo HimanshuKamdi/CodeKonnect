@@ -4,7 +4,6 @@ import { SideBar } from "../SideBar/SideBar.component";
 import firebase from "../../firebase";
 import { useHistory } from 'react-router-dom';
 import { setfavouriteChannel, removefavouriteChannel, updateChannelMembers, } from "../../store/actioncreator";
-// import "../Messages/Messages.css";
 import "./RepositoryContents.css";
 import { FileUpload } from "../Messages/MessageUpload/FileUpload.component";
 import { CommitPopup } from "./Commitpopup.component.jsx";
@@ -30,15 +29,15 @@ const Files = (props) => {
 
   const storageRef = firebase.storage().ref();
   const divRef = useRef();
-  const usersRef = firebase.database().ref("users");
+
+  const username = "HimanshuKamdi";
+  const repo = "DBMS-Project";
+  const branch = "main";
+  const accessToken = "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";
 
   const fetchRepoContents = async (path = "") => {
     console.log("fetch");
     try {
-      const username = "HimanshuKamdi";
-      const repo = "DBMS-Project";
-      const branch = "main";
-      const accessToken = "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";
       const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${path}?ref=${branch}`;
 
       const response = await fetch(apiUrl, {
@@ -59,12 +58,12 @@ const Files = (props) => {
         console.log("item", item);
         pushToDatabase(item);
       }
-      );
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-      console.log("repoContents", repoContents);
+    );
+  } catch (error) {
+    setError(error.message);
+  } finally {
+    setLoading(false);
+    console.log("repoContents", repoContents);
     }
   };
 
@@ -74,10 +73,6 @@ const Files = (props) => {
 
   const fetchCommitHistory = async () => {
     try {
-      const username = "HimanshuKamdi";
-      const repo = "DBMS-Project";
-      const branch = "main";
-      const accessToken = "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";
       const apiUrl = `https://api.github.com/repos/${username}/${repo}/commits?sha=${branch}`;
 
       const response = await fetch(apiUrl, {
@@ -183,6 +178,8 @@ const Files = (props) => {
           throw new Error(`Failed to fetch file: ${response.status}`);
         }
 
+        
+
         const filePath = item.path.replace(/[.#$/\[\]]/g, "_");
         const filesPathRef = channelFilesRef.child(filePath);
         const content = await response.text();
@@ -246,7 +243,7 @@ const Files = (props) => {
     if (item.type === "file") {
       const response = await fetch(item.download_url);
       if (!response.ok) {
-        throw new Error(`Failed to fetch file: ${response.status}`);
+        console.error(`Failed to fetch file: ${response.status}`);
       }
       const filePath = item.path.replace(/[.#$/\[\]]/g, "_");
       const filesPathRef = channelFilesRef.child(filePath);
@@ -293,7 +290,7 @@ const Files = (props) => {
       ).catch(error => {
         console.error("Error checking folder existence:", error);
       }
-      );
+      );   
 
     }
   };
@@ -356,40 +353,6 @@ const Files = (props) => {
   }
 
   return (
-    // <div>
-    //   <h1>Repository Contents</h1>
-    //   <ul>
-    //     {currentDirectory && (
-    //       <li key="Go Up">
-    //         <button onClick={navigateUp}>..</button>
-    //       </li>
-    //     )}
-    //     {repoContents.map((content) => (
-    //       <li key={content.name}>
-    //         {content.type === "dir" ? (
-    //           <button onClick={() => handleDirectoryClick(content.path)}>
-    //             {content.name} (Directory)
-    //           </button>
-    //         ) : (
-    //           <button onClick={() => handleItemClick(content)}>
-    //             {content.name} (File)
-    //           </button>
-    //         )}
-    //       </li>
-    //     ))}
-    //   </ul>
-
-    //   <h2>Commit History:</h2>
-    //   <ul>
-    //     {commitHistory.map((commit) => (
-    //       <li key={commit.sha}>
-    //         {commit.commit.author.name}: {commit.commit.message}
-    //       </li>
-    //     ))}
-    //   </ul>
-
-
-    // </div>
     <>
       <div className="header_section">
         <button className="commit_btn" onClick={() => setFileDialog(true)}>
@@ -401,7 +364,7 @@ const Files = (props) => {
           onClose={() => setFileDialog(false)}
         />
 
-        <button className="commit_btn" onClick={toggleCommitHistory}>
+<button className="commit_btn" onClick={toggleCommitHistory}>
           {showCommitHistory ? "Hide Commit History" : "View Commit History"}
         </button>
         <button className="commit_btn" onClick={toggleCommitPopup}>
@@ -421,18 +384,11 @@ const Files = (props) => {
               }
             });
           }}
+          channelFilesRef={channelFilesRef}
         />
       </div>
 
-      <div className="repository-contents">
-        <h1>Repository Contents</h1>
-        <ul>
-          {currentDirectory && (
-            <li key="Go Up">
-              <button onClick={navigateUp}>..</button>
-            </li>
-          )}
-          {showCommitHistory ? (
+      {showCommitHistory ? (
             <div>
               <h2>Commit History:</h2>
               <ul>
@@ -450,34 +406,43 @@ const Files = (props) => {
                 ))}
               </ul>
             </div>
-          ) : (
-            repoContents.map((content) => (
-              <li key={content.name}>
-                {content.type === "dir" ? (
-                  <button
-                    onClick={() => handleDirectoryClick(content.path)}
-                    className="directory-button"
-                  >
-                    {content.name} (Directory)
-                  </button>
-                ) : (
-                  <div className="file-list">
-                    <button
-                      onClick={() => handleItemClick(content)}
-                      className="file-button"
-                    >
-                      {content.name} (File)
-                    </button>
-
-                    <Button icon="download" onClick={() => handleDownload(content.download_url, content.name)} style={{ marginLeft: "auto", backgroundColor: "#64CCC5" }} />
-
-                  </div>
-                )}
-              </li>
-            ))
+          ) :
+      (
+        <div className="repository-contents">
+        <h1>Repository Contents</h1>
+        <ul>
+          {currentDirectory && (
+            <li key="Go Up">
+              <button onClick={navigateUp}>..</button>
+            </li>
           )}
+          {repoContents.map((content) => (
+            <li key={content.name}>
+              {content.type === "dir" ? (
+                <button
+                  onClick={() => handleDirectoryClick(content)}
+                  className="directory-button"
+                >
+                  {content.name} (Directory)
+                </button>
+              ) : (
+                <div className="file-list">
+                  <button
+                    onClick={() => handleItemClick(content)}
+                    className="file-button"
+                  >
+                    {content.name} (File)
+                  </button>
+
+                  <Button icon="download" onClick={() => handleDownload(content.download_url, content.name)} style={{ marginLeft: "auto", backgroundColor: "#64CCC5" }} />
+
+                </div>
+              )}
+            </li>
+          ))}
         </ul>
       </div>
+      )}
     </>
   );
 };
@@ -493,8 +458,10 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     setfavouriteChannel: (channel) => dispatch(setfavouriteChannel(channel)),
-    removefavouriteChannel: (channel) => dispatch(removefavouriteChannel(channel)),
-    updateChannelMembers: (channelId, updatedMembers) => dispatch(updateChannelMembers(channelId, updatedMembers)),
+    removefavouriteChannel: (channel) =>
+      dispatch(removefavouriteChannel(channel)),
+    updateChannelMembers: (channelId, updatedMembers) =>
+      dispatch(updateChannelMembers(channelId, updatedMembers)),
   };
 };
 

@@ -93,7 +93,7 @@ const Messages = (props) => {
     }
 
     const starChange = () => {
-        console.log("Star change");
+        // console.log("Star change");
         let favouriteRef = usersRef.child(props.user.uid).child("favourite").child(props.channel.id);
         if (isStarred()) {
             favouriteRef.remove();
@@ -103,8 +103,8 @@ const Messages = (props) => {
     }
 
     const isStarred = () => {
-        console.log("Is starred");
-        console.log(props.favouriteChannels);
+        // console.log("Is starred");
+        // console.log(props.favouriteChannels);
         return Object.keys(props.favouriteChannels).includes(props.channel?.id);
     }
 
