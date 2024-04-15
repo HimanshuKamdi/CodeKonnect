@@ -8,7 +8,6 @@ import "./RepositoryContents.css";
 import { FileUpload } from "../Messages/MessageUpload/FileUpload.component";
 import { CommitPopup } from "./Commitpopup.component.jsx";
 import { Button, Input } from "semantic-ui-react";
-import uuidv4 from "uuid/v4";
 
 const Files = (props) => {
   const history = useHistory();
@@ -17,6 +16,7 @@ const Files = (props) => {
   const [error, setError] = useState(null);
   const [currentDirectory, setCurrentDirectory] = useState("");
   const [commitHistory, setCommitHistory] = useState([]);
+  const [branch, setBranch] = useState();
 
   const filesRef = firebase.database().ref('files');
   const channelFilesRef = filesRef.child(props.channel.id);
@@ -26,19 +26,19 @@ const Files = (props) => {
   const [showCommitHistory, setShowCommitHistory] = useState(false);
   const [commitMessage, setCommitMessage] = useState("");
   const [showCommitPopup, setShowCommitPopup] = useState(false);
-
+  const [firebaseFiles, setFirebaseFiles] = useState([]);
   const storageRef = firebase.storage().ref();
   const divRef = useRef();
 
-  const username = "HimanshuKamdi";
-  const repo = "DBMS-Project";
-  const branch = "main";
-  const accessToken = "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";
+  const username = props.channel.repo_owner || "HimanshuKamdi";
+  const repo = props.channel.repo_name || "DBMS-Project";
+  const githubRepoFullName = username ? `${username}/${repo}` : 'HimanshuKamdi/DBMS-Project';
+  const accessToken = props.user.gitHub?.gitHubToken || "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";
+
 
   const fetchRepoContents = async (path = "") => {
-    console.log("fetch");
     try {
-      const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${path}?ref=${branch}`;
+      const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${path}`;
 
       const response = await fetch(apiUrl, {
         headers: {
@@ -46,30 +46,28 @@ const Files = (props) => {
         },
       });
       if (!response.ok) {
-        throw new Error(
-          `Failed to fetch repository contents: ${response.status}`
-        );
+        console.log("Failed to fetch repo contents: ", response);
       }
 
       const data = await response.json();
-      setRepoContents(data);
+      if (data?.message !== "This repository is empty." && data?.message !== "Not Found") {
+        data.forEach(item => {
+          pushToDatabase(item);
+        });
+        setRepoContents(data);
+      } 
+      else if(data?.message === "Not Found"){
+        setRepoContents([]);
+      }     
       setCurrentDirectory(path);
-      repoContents.forEach(item => {
-        console.log("item", item);
-        pushToDatabase(item);
-      }
-    );
-  } catch (error) {
-    setError(error.message);
-  } finally {
-    setLoading(false);
-    console.log("repoContents", repoContents);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    console.log("useEffect");
-  }, [repoContents]);
+
 
   const fetchCommitHistory = async () => {
     try {
@@ -81,11 +79,34 @@ const Files = (props) => {
         },
       });
       if (!response.ok) {
-        throw new Error(`Failed to fetch commit history: ${response.status}`);
+        console.log(`Failed to fetch commit history: ${response.status}`);
       }
 
       const commits = await response.json();
-      setCommitHistory(commits);
+      if(commits.message !== "Git Repository is empty."){
+        setCommitHistory(commits);
+      }
+      // else{
+      //   setCommitHistory(["No commits till now..."]);
+      // }
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  const fetchDefaultBranch = async () => {
+    try {
+      const response = await fetch(`https://api.github.com/repos/${username}/${repo}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (!response.ok) {
+        console.log(`Failed to fetch repository details: ${response.status}`);
+        setBranch("main");
+      }
+      const repoDetails = await response.json();
+      setBranch(repoDetails.default_branch);
     } catch (error) {
       setError(error.message);
     }
@@ -93,8 +114,15 @@ const Files = (props) => {
 
   useEffect(() => {
     fetchRepoContents();
-    fetchCommitHistory();
+    fetchDefaultBranch();
   }, []);
+
+  useEffect(() => {
+    if(branch){
+    fetchCommitHistory();      
+    }
+
+  }, [branch])
 
   useEffect(() => {
     if (props.channel) {
@@ -144,22 +172,12 @@ const Files = (props) => {
   };
 
   const handle_Commit = () => {
-    const newCommit = {
-      author: props.user.displayName,
-      message: commitMessage,
-    };
-
-    console.log("Commit array: ", newCommit);
-
-    setCommitHistory((prevCommitHistory) => [...prevCommitHistory, newCommit]);
-
     setShowCommitPopup(false);
     setCommitMessage("");
-  };
-
-  const addCommitToHistory = (commitMessage) => {
-    setCommitHistory([commitMessage, ...commitHistory]);
-    console.log('Commit added to history:', commitMessage);
+    setTimeout(() => {
+      fetchCommitHistory();
+      fetchRepoContents(currentDirectory);
+  }, 5000); 
   };
 
   const navigateUp = () => {
@@ -170,15 +188,12 @@ const Files = (props) => {
   };
 
   const handleItemClick = async (item) => {
-    console.log("item", item);
     if (item.type === "file") {
       try {
         const response = await fetch(item.download_url);
         if (!response.ok) {
-          throw new Error(`Failed to fetch file: ${response.status}`);
+          console.log(`Failed to fetch file: ${response.status}`);
         }
-
-        
 
         const filePath = item.path.replace(/[.#$/\[\]]/g, "_");
         const filesPathRef = channelFilesRef.child(filePath);
@@ -188,7 +203,7 @@ const Files = (props) => {
             filesPathRef.set({
               fileName: item.name,
               fileContent: content,
-              connectedUsers: [],
+              connectedUsers: [props.user],
               changes: [],
               editedBy: "",
               edited: false,
@@ -203,17 +218,16 @@ const Files = (props) => {
           } else {
             filesPathRef.child('connectedUsers').transaction(connectedUsers => {
               if (!connectedUsers) {
-                return [{ uid: props.user.uid, displayName: props.user.displayName }];
+                return [props.user];
               } else {
                 const userExists = connectedUsers.some(user => user.uid === props.user.uid);
                 if (!userExists) {
-                  return [...connectedUsers, { uid: props.user.uid, displayName: props.user.displayName }];
+                  return [...connectedUsers, props.user];
                 } else {
                   return connectedUsers;
                 }
               }
             }).then(() => {
-              console.log("User added to connected users.");
             }).catch(error => {
               console.error("Error updating connected users:", error);
             });
@@ -226,7 +240,6 @@ const Files = (props) => {
         const userRef = filesPathRef.child('connectedUsers').child(props.user.uid);
         userRef.onDisconnect().remove()
           .then(() => {
-            console.log("On disconnect: User removed from connected users.");
           })
           .catch(error => {
             console.error("Error removing user on disconnect:", error);
@@ -281,7 +294,6 @@ const Files = (props) => {
             path: item.path,
             type: "dir",
           }).then(() => {
-            console.log("Folder created successfully.");
           }).catch(error => {
             console.error("Error creating folder:", error);
           });
@@ -290,7 +302,7 @@ const Files = (props) => {
       ).catch(error => {
         console.error("Error checking folder existence:", error);
       }
-      );   
+      );
 
     }
   };
@@ -300,22 +312,158 @@ const Files = (props) => {
   };
 
   const uploadFile = (file) => {
-    const filePath = `chat/files/${uuidv4()}_${file.name}`;
-    // setMessageState(file.name);
-    storageRef
-      .child(filePath)
-      .put(file)
-      .then((data) => {
-        data.ref
-          .getDownloadURL()
-          .then((url) => {
-            //sendFile(url, file.name);
-            // console.log("URL",url);
-          })
-          .catch((err) => console.log(err));
-      })
-      .catch((err) => console.log(err));
+    const fileReader = new FileReader();  
+    fileReader.onload = (event) => {
+      const fileContent = event.target.result;
+      handleUploadCommit(`Uploading ${file.name}...`,file,fileContent);
+    };    
+    fileReader.readAsText(file);
   };
+
+  const createGithubFileBlob = async (accessToken, repoFullName, content, encoding = "utf-8") => {
+    const blobResp = await fetch(`https://api.github.com/repos/${repoFullName}/git/blobs`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': `Bearer ${accessToken}`,
+        'X-GitHub-Api-Version': '2022-11-28'
+      },
+      body: JSON.stringify({
+        "content": content,
+        "encoding": encoding
+      })
+    });
+    const response = await blobResp.json();
+
+    return response.sha;
+  };
+
+  const getShaForBaseTree = async (accessToken, repoFullName, branchName) => {
+    const baseTreeResp = await fetch(`https://api.github.com/repos/${repoFullName}/git/trees/${branchName}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': `Bearer ${accessToken}`,
+        'X-GitHub-Api-Version': '2022-11-28'
+      },
+    });
+    const response = await baseTreeResp.json();
+
+    return response.sha;
+  };
+
+  const getParentSha = async (accessToken, repoFullName, branchName) => {
+    const parentResp = await fetch(`https://api.github.com/repos/${repoFullName}/git/refs/heads/${branchName}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': `Bearer ${accessToken}`,
+        'X-GitHub-Api-Version': '2022-11-28'
+      },
+    });
+    const response = await parentResp.json();
+
+    return response.object.sha;
+  };
+
+  const createGithubRepoTree = async (accessToken, repoFullName, branchName, commitFiles) => {
+    const shaForBaseTree = await getShaForBaseTree(accessToken, repoFullName, branchName);
+
+    const tree = [];
+
+    for (const file of commitFiles) {
+      const fileSha = await createGithubFileBlob(accessToken, repoFullName, file.content, file.encoding);
+      tree.push({
+        "path": file.path,
+        "mode": "100644",
+        "type": "blob",
+        "sha": fileSha
+      });
+    }
+
+    const payload = {
+      "base_tree": shaForBaseTree,
+      "tree": tree
+    };
+
+    const treeResp = await fetch(`https://api.github.com/repos/${repoFullName}/git/trees`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': `Bearer ${accessToken}`,
+        'X-GitHub-Api-Version': '2022-11-28'
+      },
+      body: JSON.stringify(payload)
+    });
+    const response = await treeResp.json();
+
+    return response.sha;
+  };
+
+  const createGithubCommit = async (accessToken, repoFullName, branchName, commitMessage, commitFiles) => {
+    const tree = await createGithubRepoTree(accessToken, repoFullName, branchName, commitFiles);
+    const parentSha = await getParentSha(accessToken, repoFullName, branchName);
+
+    const payload = {
+      "message": commitMessage,
+      "tree": tree,
+      "parents": [parentSha]
+    };
+
+    const response = await fetch(`https://api.github.com/repos/${repoFullName}/git/commits`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': `Bearer ${accessToken}`,
+        'X-GitHub-Api-Version': '2022-11-28'
+      },
+      body: JSON.stringify(payload)
+    });
+    const commitResp = await response.json();
+    const commitSha = commitResp.sha;
+
+    await updateGithubBranchRef(accessToken, repoFullName, branchName, commitSha);
+  };
+
+  const updateGithubBranchRef = async (accessToken, repoFullName, branchName, commitSha) => {
+    const payload = {
+      "sha": commitSha,
+      "force": false
+    };
+
+    const response = await fetch(`https://api.github.com/repos/${repoFullName}/git/refs/heads/${branchName}`, {
+      method: 'PATCH',
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': `Bearer ${accessToken}`,
+        'X-GitHub-Api-Version': '2022-11-28'
+      },
+      body: JSON.stringify(payload)
+    });
+    const commitResp = await response.json();
+  };
+
+  const handleUploadCommit = async (commitMessage, file, fileContent) => {
+    const commitFile = [{
+      path: currentDirectory ? `${currentDirectory}/${file.name}` : file.name,
+      content: fileContent,
+      encoding: "utf-8"
+    }];
+    await createGithubCommit(
+      accessToken,
+      githubRepoFullName,
+      branch,
+      commitMessage,
+      commitFile,
+    );
+
+    setTimeout(() => {
+      fetchRepoContents(currentDirectory);
+      fetchCommitHistory();
+    }, 10000);
+  };
+
+  
 
   const handleDownload = async (downloadUrl, inputFileName) => {
     try {
@@ -364,7 +512,7 @@ const Files = (props) => {
           onClose={() => setFileDialog(false)}
         />
 
-<button className="commit_btn" onClick={toggleCommitHistory}>
+        <button className="commit_btn" onClick={toggleCommitHistory}>
           {showCommitHistory ? "Hide Commit History" : "View Commit History"}
         </button>
         <button className="commit_btn" onClick={toggleCommitPopup}>
@@ -375,74 +523,66 @@ const Files = (props) => {
           onClose={toggleCommitPopup}
           onCommit={(commitMessage) => {
             handle_Commit(commitMessage);
-            addCommitToHistory({
-              commit: {
-                author: {
-                  name: props.user.displayName,
-                },
-                message: commitMessage,
-              }
-            });
           }}
           channelFilesRef={channelFilesRef}
+          accessToken={accessToken }
+          githubRepoFullName={githubRepoFullName}
+          branch={branch}
         />
       </div>
 
       {showCommitHistory ? (
-            <div>
-              <h2>Commit History:</h2>
-              <ul>
-                {commitHistory.map((commit, index) => (
-                  <React.Fragment key={commit.sha}>
-                    {index > 0 &&
-                      commitHistory[index - 1].commit.author.name !==
-                      commit.commit.author.name && (
-                        <hr />
-                      )}
-                    <li>
-                      {commit.commit.author.name}: {commit.commit.message}
-                    </li>
-                  </React.Fragment>
-                ))}
-              </ul>
-            </div>
-          ) :
-      (
         <div className="repository-contents">
-        <h1>Repository Contents</h1>
+        <h1>Commit History</h1>
         <ul>
-          {currentDirectory && (
-            <li key="Go Up">
-              <button onClick={navigateUp}>..</button>
-            </li>
-          )}
-          {repoContents.map((content) => (
-            <li key={content.name}>
-              {content.type === "dir" ? (
-                <button
-                  onClick={() => handleDirectoryClick(content)}
-                  className="directory-button"
-                >
-                  {content.name} (Directory)
-                </button>
-              ) : (
-                <div className="file-list">
-                  <button
-                    onClick={() => handleItemClick(content)}
-                    className="file-button"
-                  >
-                    {content.name} (File)
-                  </button>
-
-                  <Button icon="download" onClick={() => handleDownload(content.download_url, content.name)} style={{ marginLeft: "auto", backgroundColor: "#64CCC5" }} />
-
-                </div>
+            {commitHistory && commitHistory?.map((commit, index) => (
+              <React.Fragment key={commit.sha}>                
+                    <p>{commit.commit.author.date.slice(0, 10)} </p>
+                <li>
+                  {commit.commit.author.name}: {commit.commit.message}
+                </li>
+                    <hr />
+              </React.Fragment>
+            ))}
+          </ul>
+        </div>
+      ) :
+        (
+          <div className="repository-contents">
+            <h1>Repository Contents</h1>
+            <ul>
+              {currentDirectory && (
+                <li key="Go Up">
+                  <button onClick={navigateUp}>..</button>
+                </li>
               )}
-            </li>
-          ))}
-        </ul>
-      </div>
-      )}
+              {repoContents.map((content) => (
+                <li key={content.name}>
+                  {content.type === "dir" ? (
+                    <button
+                      onClick={() => handleDirectoryClick(content)}
+                      className="directory-button"
+                    >
+                      {content.name} (Directory)
+                    </button>
+                  ) : (
+                    <div className="file-list">
+                      <button
+                        onClick={() => handleItemClick(content)}
+                        className="file-button"
+                      >
+                        {content.name} (File)
+                      </button>
+
+                      <Button icon="download" onClick={() => handleDownload(content.download_url, content.name)} style={{ marginLeft: "auto", backgroundColor: "#64CCC5" }} />
+
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
     </>
   );
 };

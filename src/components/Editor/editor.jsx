@@ -30,8 +30,6 @@ const Editor = ({ filePathRef, fileContent, user }) => {
 
             filePathRef.on('value', snapshot => {
                 const fileData = snapshot.val();
-                console.log("File Data:", fileData);
-                console.log(user);
                 if (fileData && fileData.editedBy) { 
                     if (fileData.editedBy !== user) { 
                         const fileContent = fileData.fileContent;

@@ -1,4 +1,4 @@
-import { SET_USER, SET_USERS, SET_CHANNEL ,SET_FAVOURITECHANNEL,REMOVE_FAVOURITECHANNEL, UPDATE_CHANNEL_MEMBERS} from './actiontypes';
+import { SET_USER, SET_USERS, SET_CHANNEL ,SET_FAVOURITECHANNEL,REMOVE_FAVOURITECHANNEL, UPDATE_CHANNEL_MEMBERS, UPDATE_CHANNEL_ADMINS} from './actiontypes';
 
 export const setUser = (user) => {
     return {
@@ -55,6 +55,16 @@ export const updateChannelMembers = (channelId, updatedMembers) => {
         payload: {
             channelId: channelId,
             updatedMembers: updatedMembers
+        }
+    }
+}
+
+export const updateChannelAdmins = (channelId, updatedAdmins) => {
+    return {
+        type: UPDATE_CHANNEL_ADMINS,
+        payload: {
+            channelId: channelId,
+            updatedAdmins: updatedAdmins
         }
     }
 }

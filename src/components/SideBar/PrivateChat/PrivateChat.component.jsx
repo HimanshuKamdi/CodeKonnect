@@ -12,6 +12,7 @@ const PrivateChat = (props) => {
     const [usersState, setUsersState] = useState([]);
 
     const [connectedUsersState, setConnectedUsersState] = useState([]);
+    const [channelsVisitedState, setChannelsVisitedState] = useState({});
 
     const usersRef = firebase.database().ref("users");
 
@@ -79,6 +80,7 @@ const PrivateChat = (props) => {
 
         return () => statusRef.off();
     }, [usersState]);
+    
 
     const displayUsers = () => {
         if (usersState.length > 0 && props.user !== null) {
@@ -100,10 +102,11 @@ const PrivateChat = (props) => {
         }
     }
 
+   
     const selectUser = (user) => {
-        console.log(user);
+        // console.log(user);
         let userTemp = { ...user };
-        console.log("Temp",userTemp);
+        // console.log("Temp",userTemp);
         userTemp.id = generateChannelId(user.id);
         if (props.channel !==null){
             setLastVisited(props.user, props.channel);
@@ -141,7 +144,7 @@ const PrivateChat = (props) => {
 const mapStateToProps = (state) => {
     return {
         user: state.user.currentUser,
-        channel: state.channel.currentChannel
+        channel: state.channel.currentChannel,
     }
 }
 

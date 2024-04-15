@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Icon } from 'semantic-ui-react';
+import { Modal, Button, Icon, Segment } from 'semantic-ui-react';
 
 export const CommitPopup = (props) => {
     const [commitMessage, setCommitMessage] = useState('');
@@ -21,20 +21,33 @@ export const CommitPopup = (props) => {
                     editedFiles.push(fileObject);
                 }
             });
-            console.log("All Files",files);
-            console.log("edited Files",editedFiles);
     
             setCommitFiles(editedFiles); 
         }).catch(error => {
             console.error('Error fetching file changes:', error);
         });
-    };
-    
+    };   
     
 
     useEffect(() => {
         fetchFileChanges();
     }, []);
+
+    const resetChangedFiles = () => {
+        props.channelFilesRef.once('value').then(snapshot => {
+            const files = snapshot.val();
+    
+            snapshot.forEach(fileSnapshot => {
+                const file = fileSnapshot.val();
+                if (file.edited) {
+                    fileSnapshot.ref.child("edited").set(false);
+                }
+            });
+    
+        }).catch(error => {
+            console.error('Error fetching file changes:', error);
+        });
+    };
 
     const createGithubFileBlob = async (githubAccessToken, repoFullName, content, encoding = "utf-8") => {
         const blobResp = await fetch(`https://api.github.com/repos/${repoFullName}/git/blobs`, {
@@ -64,7 +77,6 @@ export const CommitPopup = (props) => {
             },
         });
         const response = await baseTreeResp.json();
-
         return response.sha;
     };
 
@@ -117,6 +129,7 @@ export const CommitPopup = (props) => {
     };
 
     const createGithubCommit = async (githubAccessToken, repoFullName, branchName, commitMessage, commitFiles) => {
+        console.log("Inside create github ");
         const tree = await createGithubRepoTree(githubAccessToken, repoFullName, branchName, commitFiles);
         const parentSha = await getParentSha(githubAccessToken, repoFullName, branchName);
 
@@ -157,19 +170,16 @@ export const CommitPopup = (props) => {
             body: JSON.stringify(payload)
         });
         const commitResp = await response.json();
+        console.log("response",commitResp);
     };
 
-    const githubAccessToken = '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';
-    const githubRepoFullName = 'HimanshuKamdi/DBMS-Project';
-    const githubRepoBranchName = 'main';
-    const commitTitle = commitMessage;
-    // const username = "HimanshuKamdi";
-    // const repo = "DBMS-Project";
-    // const branch = "main";
-    // const accessToken = "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";
+
 
     const handleCommit = async () => {
-        console.log("Commit function");
+        const githubAccessToken = props.accessToken;
+        const githubRepoFullName = props.githubRepoFullName;
+        const githubRepoBranchName = props.branch;
+        const commitTitle = commitMessage;
         await createGithubCommit(
             githubAccessToken,
             githubRepoFullName,
@@ -177,19 +187,26 @@ export const CommitPopup = (props) => {
             commitTitle,
             commitFiles,
         );
-        console.log("Commit Files",commitFiles);
+        console.log("commit");
         props.onCommit(commitMessage);
         setCommitMessage('');
-        console.log('Commit message:', commitMessage);
+        resetChangedFiles();
         props.onClose();
     };
 
 
 
     return (
-        <Modal basic open={props.open} onClose={props.onClose}>
+        <Modal open={props.open} onClose={props.onClose}>
             <Modal.Header>Add Commit</Modal.Header>
             <Modal.Content>
+                <Segment stacked>
+                <p style={{fontSize: "25px"}}>Files to commit</p>  
+                <ul>             
+                {commitFiles?.map((file, index) => (
+                        <li key={index} style={{color:"Black", fontSize:"18px", marginBottom: '25px' }}>{file.path}</li>
+                ))}
+                </ul> 
                 <textarea
                     value={commitMessage}
                     onChange={(e) => setCommitMessage(e.target.value)}
@@ -197,6 +214,7 @@ export const CommitPopup = (props) => {
                     rows={4}
                     style={{ width: '100%', resize: 'none', fontSize: '20px' }}
                 />
+                </Segment>
             </Modal.Content>
             <Modal.Actions>
                 <Button color="green" onClick={handleCommit}>
@@ -209,3 +227,6 @@ export const CommitPopup = (props) => {
         </Modal>
     );
 };
+
+
+

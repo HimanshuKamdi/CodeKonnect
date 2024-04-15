@@ -7,6 +7,7 @@ import { useLocation, useParams, } from 'react-router-dom';
 import firebase from "../../firebase";
 import { Image } from 'semantic-ui-react';
 import "./editorpage.css";
+import CustomIcon from '../../components/SideBar/UserInfo/image/logo3.png';
 
 function EditorPage(props) {
     const history = useHistory();
@@ -42,7 +43,6 @@ function EditorPage(props) {
               return connectedUsers;
             }
           }).then(() => {
-            console.log("User removed from connected users successfully.");
           }).catch(error => {
             console.error("Error removing user from connected users:", error);
           });
@@ -65,11 +65,7 @@ function EditorPage(props) {
             <div className="aside">
                 <div className="asideInner">
                     <div className="logo">
-                        <img
-                            className="logoImage"
-                            src="/code-sync.png"
-                            alt="logo"
-                        />
+                    <img src={CustomIcon} alt="Icon" style={{width:"100px"}}  />
                     </div>
                     <h3>Connected</h3>
                     <div className="clientsList">

@@ -8,7 +8,7 @@ import { Menu, Icon, Modal, Button, Form, Segment } from 'semantic-ui-react';
 
 const Channels = (props) => {
     const [modalOpenState, setModalOpenState] = useState(false);
-    const [channelAddState, setChannelAddState] = useState({ name: '', description: '', repo_name: '', members: [], admin: []});
+    const [channelAddState, setChannelAddState] = useState({ name: '', description: '', repo_name: '', members: [], admin: [] });
     const [isLoadingState, setLoadingState] = useState(false);
     const [channelsState, setChannelsState] = useState([]);
     const [createNewRepo, setCreateNewRepo] = useState(false);
@@ -16,8 +16,6 @@ const Channels = (props) => {
     const [suggestions, setSuggestions] = useState([]);
     const [validChannels, setValidChannels] = useState([]);
     const [allMembers, setAllMembers] = useState(false);
-
-    console.log("channel props", props);
 
     const handleCheckboxChange = () => {
         setCreateNewRepo(!createNewRepo);
@@ -28,9 +26,11 @@ const Channels = (props) => {
 
     useEffect(() => {
         if (props.user && props.user.uid) {
-            setChannelAddState({ name: '', description: '', repo_name: '', members: [props.user], admin: [props.user.uid]});
+            setChannelAddState({ name: '', description: '', repo_name: '', members: [props.user], admin: [props.user.uid] });
         }
     }, [props.user])
+
+    const githubToken = props.user.gitHub?.gitHubToken;
 
     useEffect(() => {
         if (props.user) {
@@ -41,24 +41,17 @@ const Channels = (props) => {
         }
     }, [channelsState, props.user]);
 
-    const toggleFavoriteChannel = (channelId) => {
-        // console.log("Inside toggle");
-        const isFavourite = props.favouriteChannels[channelId];
-        if (isFavourite) {
-            props.removefavouriteChannel(channelId);
-            // console.log("Favorite Channel:", props.favouriteChannels);
-        } else {
-            props.setfavouriteChannel(channelId);
-            // console.log("Favorite Channel:", props.favouriteChannels);
+    useEffect(() => {
+        if (suggestInput.length > 0) {
+            let searchResults = props.users.filter(user => {
+                return user.displayName.toLowerCase().includes(suggestInput.toLowerCase());
+            });
+            setSuggestions(searchResults);
         }
-    };
-
-    const moveChannelToTop = (channelId) => {
-        const updatedChannels = channelsState.filter(channel => channel.id !== channelId);
-        const selectedChannel = channelsState.find(channel => channel.id === channelId);
-        updatedChannels.unshift(selectedChannel);
-        setChannelsState(updatedChannels);
-    };
+        else {
+            setSuggestions([]);
+        }
+    }, [suggestInput]);
 
     useEffect(() => {
         channelsRef.on('child_added', (snap) => {
@@ -72,11 +65,11 @@ const Channels = (props) => {
         return () => channelsRef.off();
     }, []);
 
-    useEffect(() => {
-        if (channelsState.length > 0) {
-            props.selectChannel(channelsState[0])
-        }
-    }, [!props.channel ? channelsState : null])
+    // useEffect(() => {
+    //     if (channelsState.length > 0) {
+    //         props.selectChannel(channelsState[0])
+    //     }
+    // }, [!props.channel ? channelsState : null])
 
     const openModal = () => {
         setModalOpenState(true);
@@ -89,38 +82,6 @@ const Channels = (props) => {
     const checkIfFormValid = () => {
         return channelAddState && channelAddState.name && channelAddState.description;
     }
-
-    const handleChannelButtonClick = (channel) => {
-
-        const fetchRepositoryContents = async (owner, repo) => {
-            const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents`);
-            if (response.ok) {
-                const contents = await response.json();
-                return contents;
-            } else {
-                throw new Error('Failed to fetch repository contents');
-            }
-        };
-
-    let repo = "repo name from channel";
-    let owner = "owner username from channel";
-
-    fetchRepositoryContents(owner, repo)
-            .then(contents => {
-                // Display repository contents in your UI
-                const contentsList = document.getElementById('contentsList');
-
-                contents.forEach(content => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = content.name;
-                    contentsList.appendChild(listItem);
-                });
-            })
-            .catch(error => {
-                // Handle error
-                console.error(error);
-            });
-    };
 
     const displayChannels = () => {
         if (channelsState.length > 0) {
@@ -135,10 +96,6 @@ const Channels = (props) => {
                     nonFavoriteChannels.push(channel);
                 }
             });
-            // console.log("favoriteChannels", favoriteChannels);
-            // console.log("nonFavoriteChannels", nonFavoriteChannels);
-    
-            // Render favorite channels
             const favoriteChannelsElements = favoriteChannels.map(channel => {
                 if (channel.members && props.user && channel.members.some(member => member.uid === props.user.uid)) {
                     return (
@@ -159,8 +116,7 @@ const Channels = (props) => {
                     );
                 }
             });
-    
-            // Render non-favorite channels
+
             const nonFavoriteChannelsElements = nonFavoriteChannels.map(channel => {
                 if (channel.members && props.user && channel.members.some(member => member.uid === props.user.uid)) {
                     return (
@@ -180,19 +136,19 @@ const Channels = (props) => {
                     );
                 }
             });
-    
-            // Concatenate favorite and non-favorite channels elements
+
             return [...favoriteChannelsElements, ...nonFavoriteChannelsElements];
         }
-        return null; // Return null if no channels
+        return null; 
     };
 
     const selectChannel = (channel) => {
-        console.log(props);
-        setLastVisited(props.user, props.channel);
-        setLastVisited(props.user, channel);
-        channel.showFiles = false;
-        channel.showCommits = false;
+        if(props.channel){
+            setLastVisited(props.user, props.channel);
+            setLastVisited(props.user, channel);
+            channel.showFiles = false;
+            channel.showCommits = false;
+        }
         props.selectChannel(channel);
     }
 
@@ -201,18 +157,119 @@ const Channels = (props) => {
         lastVisited.set(firebase.database.ServerValue.TIMESTAMP);
         lastVisited.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
     }
+    async function createRepository(name, description) {
+        const token = githubToken;  
+        try {
+            const url = 'https://api.github.com/user/repos'; 
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: name,
+                    description: description,
+                    private: true, 
+                    auto_init: true,
+                }),
+            });
+
+            if (response.ok) {
+                alert(`Repository "${name}" created successfully!`);
+                return await response.json();
+            } else {
+                const errorMessage = await response.text();
+                throw new Error(`Failed to create repository: ${response.status} ${response.statusText}\n${errorMessage}`);
+            }
+        } catch (error) {
+            console.error('Error creating repository:', error);
+            throw error;
+        }
+    }
+
+    async function addCollaborator(owner, repo, collaborator) {
+        const token = githubToken;
+        const url = `https://api.github.com/repos/${owner}/${repo}/collaborators/${collaborator}`;
+        try {
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    permission: "admin"
+                }),
+            });
+
+            if (response.ok) {
+                console.log(`Collaborator ${collaborator} added successfully!`);
+                return await response.json();
+            } else {
+                const errorBody = await response.json();
+                throw new Error(`Failed to add collaborator: ${response.status} ${response.statusText}\n${errorBody.message}`);
+            }
+        } catch (error) {
+            console.error('Error adding collaborator:', error);
+            throw error;
+        }
+    }
+
 
     const createChannel = (key) => {
-        const channel = {
-            id: key,
-            name: channelAddState.name,
-            description: channelAddState.description,
-            members: channelAddState.members,
-            created_by: props.user.uid,
-            repo_name: channelAddState.repo_name,
-            admin: channelAddState.admin
+
+        if (createNewRepo) {
+
+            const channel = {
+                id: key,
+                name: channelAddState.name,
+                description: channelAddState.description,
+                members: channelAddState.members,
+                created_by: props.user.uid,
+                repo_name: channelAddState.repo_name,
+                repo_owner: props.user.gitHub?.gitHubUsername,
+                admin: channelAddState.admin
+            }
+
+            const owner = props.user.gitHub?.gitHubUsername;
+            const new_repo_name = channel.repo_name;
+            const description = channel.description;
+            createRepository(new_repo_name, description)
+                .then(repository => {
+                    setTimeout(() => {
+                        channel.members.forEach(member => {
+                            if (member.gitHub?.gitHubUsername && member.gitHub.gitHubUsername !== owner) {
+                                addCollaborator(owner, new_repo_name, member.gitHub.gitHubUsername)
+                                    .then(collaborator => {
+                                        console.log(collaborator);
+                                    })
+                                    .catch(error => {
+                                        console.error('Failed to add collaborator:', error);
+                                    });
+                            }
+                        });
+
+                    }, 5000); 
+
+                })
+                .catch(error => {
+                    console.error('Failed to create repository:', error);
+                });
+            return channel;
         }
-        return channel;
+
+        else {
+            const channel = {
+                id: key,
+                name: channelAddState.name,
+                description: channelAddState.description,
+                members: channelAddState.members,
+                created_by: props.user.uid,
+                admin: channelAddState.admin
+            }
+            return channel;
+        }
     }
 
     const adduser = async () => {
@@ -236,7 +293,7 @@ const Channels = (props) => {
         channelsRef.child(key)
             .update(channel)
             .then(() => {
-                setChannelAddState({ name: '', description: '', repo_name: '', members: [props.user], admin: [props.user.uid]});
+                setChannelAddState({ name: '', description: '', repo_name: '', members: [props.user], admin: [props.user.uid] });
                 setLoadingState(false);
                 closeModal();
             })
@@ -334,7 +391,6 @@ const Channels = (props) => {
                             onChange={handleSuggestInput}
                             type="text"
                             placeholder="Add Members"
-                            autocomplete="off"
                         />
                         <label>Select all members &nbsp;</label>
                         <input
@@ -348,20 +404,20 @@ const Channels = (props) => {
                             <ul>
                                 {suggestions.map(user => (
                                     user.uid !== props.user.uid && (
-                                    <li
-                                        key={user.uid}
-                                        onClick={() => handleSelectUser(user)}
-                                        style={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            cursor: "pointer",
-                                            backgroundColor: channelAddState.members.includes(user) ? "green" : "transparent",
-                                            margin: "10px"
-                                        }}
-                                    >
-                                        <img src={user.photoURL} style={{ width: "30px", height: "30px" }} />
-                                        {user.displayName}
-                                    </li>
+                                        <li
+                                            key={user.uid}
+                                            onClick={() => handleSelectUser(user)}
+                                            style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                cursor: "pointer",
+                                                backgroundColor: channelAddState.members.includes(user) ? "green" : "transparent",
+                                                margin: "10px"
+                                            }}
+                                        >
+                                            <img src={user.photoURL} style={{ width: "30px", height: "30px" }} />
+                                            {user.displayName}
+                                        </li>
                                     )
                                 ))}
                             </ul>
@@ -384,8 +440,8 @@ const Channels = (props) => {
                                 </>
                             ) : null
                         }
-                        
-                            {props.user?.gitHub ? <>
+
+                        {props.user?.gitHub ? <>
                             <label>Create New GitHub Repository &nbsp;</label>
                             <input
                                 type="checkbox"
@@ -413,8 +469,6 @@ const Channels = (props) => {
                 </Button>
             </Modal.Actions>
         </Modal>
-
-
     </>
 }
 

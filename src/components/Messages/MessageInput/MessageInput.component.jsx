@@ -29,7 +29,7 @@ const MessageInput = (props) => {
     }
 
     const sendMessage = (downloadUrl) => {
-        if (messageState || downloadUrl) {
+        if ((messageState && messageState.length !==0) || downloadUrl) {
             messageRef.child(props.channel.id)
                 .push()
                 .set(createMessageInfo(downloadUrl))
@@ -121,7 +121,6 @@ const MessageInput = (props) => {
                 label={createActionButtons()}
                 labelPosition="right"
             />
-            {/* Here we pass the setUploadedFileUrl function as a prop */}
             <ImageUpload uploadImage={uploadImage} open={imgDialogState} onClose={() => setImgDialog(false)} />
             <FileUpload uploadFile={uploadFile}  open={fileDialogState} onClose={() => setFileDialog(false)} />
         </Segment>

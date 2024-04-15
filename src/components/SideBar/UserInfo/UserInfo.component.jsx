@@ -31,10 +31,13 @@ const UserInfo = (props) => {
         })
         firebase.auth()
             .signOut()
-            .then(() => console.log("user signed out")            
+            .then(() => {
+                console.log("user signed out");
+                window.location.reload();
+            }
             );
-            setChannel(null);
-            setUser(null);
+        setChannel(null);
+        setUser(null);
     }
 
     if (props.user) {
@@ -42,10 +45,10 @@ const UserInfo = (props) => {
             <Grid.Column>
                 <Grid.Row className="userinfo_grid_row">
                     <Header inverted as="h2">
-                        <img src={CustomIcon} alt="Icon"  />
-                        <Header.Content></Header.Content>
-                        
-                        
+                        <img src={CustomIcon} alt="Icon" />
+                        <Header.Content>CodeKonnect</Header.Content>
+
+
                     </Header>
                     <Header className="userinfo_displayname" inverted as="h4">
                         <Dropdown
@@ -68,19 +71,19 @@ const UserInfo = (props) => {
 }
 
 const mapStateToProps = (state) => {
-  return {
-    user: state.user.currentUser,
-    users: state.users.allUsers,
-    loading: state.channel.loading
-  }
+    return {
+        user: state.user.currentUser,
+        users: state.users.allUsers,
+        loading: state.channel.loading
+    }
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return {
-    setUser: (user) => { dispatch(setUser(user)) },
-    setUsers: (users) => { dispatch(setUsers(users)) },
-    setChannel: (users) => { dispatch(setChannel(users))}
-  }
+    return {
+        setUser: (user) => { dispatch(setUser(user)) },
+        setUsers: (users) => { dispatch(setUsers(users)) },
+        setChannel: (users) => { dispatch(setChannel(users)) }
+    }
 }
 
-export default connect(mapStateToProps,mapDispatchToProps)(UserInfo);
+export default connect(mapStateToProps, mapDispatchToProps)(UserInfo);

@@ -15,14 +15,17 @@ import { AppLoader } from "./components/AppLoader/AppLoader.component";
 
 const App = (props) => {
   const history = useHistory();
+  console.log("App.js",props)
   const usersRef = firebase.database().ref("users");
 
   useEffect(() => {
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
         props.history.push("/");
+        console.log("User is logged in", props.user)
       } else {
         props.setUser(null);
+        console.log("User is not logged in", props.user)
         props.history.push("/login");
       }
       usersRef.once("value")
@@ -59,7 +62,7 @@ return (
         <Route path="/register" component={Register} />
         <Route path="/code/:repoName/:filePath*" component={Editorpage} />
         <Route path="/files/:channelname" component={Files} />
-        <Route path="/" exact component={Homepage} />
+        <Route path="/" component={Homepage} />
       </Switch>
     </div>
   );

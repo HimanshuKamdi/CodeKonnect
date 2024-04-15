@@ -1,4 +1,4 @@
-import { SET_USER, SET_USERS,SET_CHANNEL, SET_FAVOURITECHANNEL, REMOVE_FAVOURITECHANNEL, UPDATE_CHANNEL_MEMBERS } from './actiontypes';
+import { SET_USER, SET_USERS,SET_CHANNEL, SET_FAVOURITECHANNEL, REMOVE_FAVOURITECHANNEL, UPDATE_CHANNEL_MEMBERS, UPDATE_CHANNEL_ADMINS } from './actiontypes';
 import { combineReducers } from "redux";
 
 let defaultUserState = {
@@ -33,7 +33,8 @@ let defaultChannelState = {
     channelDescription: '',
     channelMembers: [],
     showFiles: false,
-    showCommits: false
+    showCommits: false,
+    admin: [],
 }
 
 const channelReducer = (state = defaultChannelState, action) => {
@@ -57,6 +58,18 @@ const channelReducer = (state = defaultChannelState, action) => {
                 currentChannel: {
                     ...state.currentChannel,
                     members: updatedMembers
+                }
+            };
+        }
+    }
+    else if (action.type === UPDATE_CHANNEL_ADMINS){
+        const { channelId, updatedAdmins } = action.payload;
+        if (state.currentChannel && state.currentChannel.id === channelId) {
+            return {
+                ...state,
+                currentChannel: {
+                    ...state.currentChannel,
+                    admin: updatedAdmins
                 }
             };
         }

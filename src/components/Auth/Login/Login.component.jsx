@@ -128,6 +128,26 @@ const Login = () => {
     //       });
     // };
 
+    const handleForgotPassword = () => {
+        // Implement forgot password functionality here
+        firebase.auth().sendPasswordResetEmail(userState.email)
+            .then(() => {
+                // Password reset email sent successfully
+                // Provide feedback to the user
+                alert("Password reset email sent. Check your email inbox.");
+            })
+            .catch((error) => {
+                // Handle errors if password reset email fails to send
+                console.error("Error sending password reset email:", error);
+                if (error.code === "auth/user-not-found") {
+                    alert("No user with that email address found. Please check your email address.");
+                } else {
+                    alert("Error sending password reset email. Please try again later.");
+                }
+            });
+    };
+    
+
     return (
         <Grid verticalAlign="middle" textAlign="center" className="grid-form" style={{ backgroundColor: 'white' }}>
             <Grid.Column width={8} style={{ maxWidth: '400px' }}>
@@ -136,7 +156,7 @@ const Login = () => {
                     <Header>
                         <span style={{ color: '#1a244a' }}>Login</span>
                     </Header>
-                    {/* <span style={{ color: '#1a244a' }}>Login</span> */}
+                    
                 </Header>
                 <Form onSubmit={onSubmit} >
                     <Segment stacked style={{ backgroundColor: '#ddedec' }}>
@@ -176,7 +196,7 @@ const Login = () => {
                 </Message>
                 }
                 <Message style={{ backgroundColor: '#ddedec' }}>
-                    Not an User? <Link to="/register" >Register </Link>
+                    Not an User? <Link to="/register" >Register </Link> | <Link to="#" onClick={handleForgotPassword}>Forgot Password?</Link>
                 </Message>
             </Grid.Column>
             <Grid.Column width={8}>

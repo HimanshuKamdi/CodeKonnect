@@ -3,7 +3,7 @@ import { Grid, Form, Segment, Header, Button, Message } from 'semantic-ui-react'
 import firebase from '../../../firebase';
 import CustomIcon from '../../SideBar/UserInfo/image/black_logo.png';
 
-import "../Auth.css"
+import "../Auth.css";
 import { Link } from 'react-router-dom';
 import loginImg from './login_image.avif';
 
@@ -74,6 +74,7 @@ const Register = () => {
                 .then(createdUser => {
                     setIsLoading(false);
                     updateuserDetails(createdUser);
+                    firebase.auth().signOut();
                 })
                 .catch(serverError => {
                     setIsLoading(false);
@@ -101,6 +102,7 @@ const Register = () => {
                 })
         }
     }
+
 
     const saveUserInDB = (createdUser) => {
         setIsLoading(true);
